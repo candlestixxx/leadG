@@ -6,7 +6,7 @@ import { campaignEngine } from '@/lib/campaigns/campaign-engine'
 jest.mock('@/lib/db/prisma', () => ({
   prisma: {
     integration: {
-      findFirst: jest.fn(),
+      findMany: jest.fn(),
     },
     lead: {
       upsert: jest.fn(),
@@ -36,7 +36,7 @@ describe('CRM Webhook API Route', () => {
   })
 
   it('should return 404 if integration is not found', async () => {
-    (prisma.integration.findFirst as jest.Mock).mockResolvedValue(null)
+    (prisma.integration.findMany as jest.Mock).mockResolvedValue([])
 
     const req = new NextRequest('http://localhost/api/webhooks/crm', {
       method: 'POST',
@@ -51,7 +51,7 @@ describe('CRM Webhook API Route', () => {
   })
 
   it('should return 400 if required fields are missing', async () => {
-    (prisma.integration.findFirst as jest.Mock).mockResolvedValue({ id: 'org-1' })
+    (prisma.integration.findMany as jest.Mock).mockResolvedValue([{ credentials: { headers: "{ \"Authorization\": \"Bearer dummy-token\" }" } }])
 
     const req = new NextRequest('http://localhost/api/webhooks/crm', {
       method: 'POST',
@@ -66,7 +66,7 @@ describe('CRM Webhook API Route', () => {
   })
 
   it('should upsert lead and add to campaign if campaignId is provided', async () => {
-    (prisma.integration.findFirst as jest.Mock).mockResolvedValue({ organizationId: 'org-1' })
+    (prisma.integration.findMany as jest.Mock).mockResolvedValue([{ organizationId: 'org-1', credentials: { headers: "{ \"Authorization\": \"Bearer dummy-token\" }" } }])
     ;(prisma.lead.upsert as jest.Mock).mockResolvedValue({ id: 'lead-1' })
 
     const req = new NextRequest('http://localhost/api/webhooks/crm', {

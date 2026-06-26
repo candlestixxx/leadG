@@ -106,6 +106,15 @@ export class ConversationEngine {
     const qualifyingQuestions = agentConfig.qualifyingQuestions || []
     const objectionResponses = agentConfig.objectionHandling || []
 
+    // Parse historical learning data (e.g., successful objection handles)
+    let historicalLearnings = '';
+    if (agentConfig.learningData && typeof agentConfig.learningData === 'object') {
+      const learnings = agentConfig.learningData.successfulObjectionHandles || [];
+      if (learnings.length > 0) {
+        historicalLearnings = `\n## HISTORICAL LEARNINGS (Use these strategies as they have worked in the past)\n${learnings.map((l: string) => `- ${l}`).join('\n')}\n`;
+      }
+    }
+
     return `You are ${agentConfig.name || 'Alex'}, an AI sales assistant.
 
 ## CORE IDENTITY
@@ -164,7 +173,7 @@ When you hear an objection:
 2. Clarify: "Can you tell me more about what's holding you back?"
 3. Reframe: Present the value from a different angle
 4. Check: "Does that address your concern?"
-
+${historicalLearnings}
 ## RESPONSE FORMAT
 Respond conversationally. Keep responses under 3 sentences unless explaining something specific.
 Never use bullet points or lists in speech — speak naturally as if on the phone.
