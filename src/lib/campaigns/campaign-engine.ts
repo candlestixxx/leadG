@@ -21,6 +21,49 @@ export const smsQueue = new Queue('sms', { connection })
 
 export class CampaignEngine {
 
+  // Add a lead to an active campaign
+  async addLeadToCampaign(campaignId: string, leadId: string): Promise<void> {
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: campaignId }
+    })
+
+    if (!campaign) {
+      throw new Error(`Campaign ${campaignId} not found`)
+    }
+
+    const campaignLead = await prisma.campaignLead.upsert({
+      where: {
+        campaignId_leadId: {
+          campaignId,
+          leadId
+        }
+      },
+      update: {
+        status: 'PENDING',
+        currentStep: 0,
+        attempts: 0,
+        nextAttempt: new Date()
+      },
+      create: {
+        campaignId,
+        leadId,
+        status: 'PENDING',
+        currentStep: 0
+      }
+    })
+
+    // If campaign is active, attempt to schedule immediate processing
+    if (campaign.status === 'ACTIVE') {
+       await campaignQueue.add('process-campaign', {
+         campaignId,
+         batchIndex: 0
+       }, {
+         removeOnComplete: true,
+         removeOnFail: 100
+       })
+    }
+  }
+
   // Start a campaign
   async startCampaign(campaignId: string): Promise<void> {
     const campaign = await prisma.campaign.findUnique({
