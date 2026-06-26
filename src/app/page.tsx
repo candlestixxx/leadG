@@ -3,6 +3,7 @@ import {
   Activity, BarChart3, PhoneCall, PhoneIncoming, PhoneOutgoing,
   Mic, Settings, Play, Pause, MoreVertical, Search, Bell
 } from 'lucide-react'
+import { getDashboardStats, getActiveCalls, getRecentOutcomes, getActiveCampaigns } from './actions/dashboard'
 
 // ─── Dashboard Stats Card ───────────────────────────────────
 
@@ -42,12 +43,8 @@ function StatCard({
 
 // ─── Live Call Monitor ──────────────────────────────────────
 
-function LiveCallCard() {
-  const activeCalls = [
-    { id: 1, lead: 'Sarah Chen', company: 'TechCorp', agent: 'Alex', duration: '2:34', sentiment: 0.7, phase: 'Qualifying' },
-    { id: 2, lead: 'Marcus Johnson', company: 'DataFlow Inc', agent: 'Jordan', duration: '0:45', sentiment: 0.3, phase: 'Greeting' },
-    { id: 3, lead: 'Lisa Park', company: 'Acme Co', agent: 'Alex', duration: '5:12', sentiment: 0.9, phase: 'Closing' },
-  ]
+async function LiveCallCard() {
+  const activeCalls = await getActiveCalls()
 
   return (
     <div className="glass-elevated rounded-2xl p-6">
@@ -107,15 +104,8 @@ function LiveCallCard() {
 
 // ─── Recent Call Outcomes ───────────────────────────────────
 
-function RecentCalls() {
-  const calls = [
-    { id: 1, lead: 'James Wright', outcome: 'Meeting Scheduled', status: 'success', time: '12 min ago', duration: '4:23' },
-    { id: 2, lead: 'Maria Santos', outcome: 'Callback Requested', status: 'pending', time: '28 min ago', duration: '1:45' },
-    { id: 3, lead: 'Tom Richards', outcome: 'Voicemail Left', status: 'neutral', time: '1 hr ago', duration: '0:32' },
-    { id: 4, lead: 'Emily Chang', outcome: 'Qualified - Transferred', status: 'success', time: '1.5 hrs ago', duration: '6:17' },
-    { id: 5, lead: 'David Kim', outcome: 'Not Interested', status: 'failed', time: '2 hrs ago', duration: '0:58' },
-    { id: 6, lead: 'Ava Thompson', outcome: 'Wrong Number', status: 'failed', time: '2.5 hrs ago', duration: '0:08' },
-  ]
+async function RecentCalls() {
+  const calls = await getRecentOutcomes()
 
   const statusColors: Record<string, string> = {
     success: 'bg-[var(--success)]/20 text-[var(--success)]',
@@ -156,12 +146,8 @@ function RecentCalls() {
 
 // ─── Campaign Overview ──────────────────────────────────────
 
-function CampaignOverview() {
-  const campaigns = [
-    { name: 'Q4 Enterprise Outreach', status: 'active', leads: 1247, called: 834, connected: 201, transferred: 47, converted: 12 },
-    { name: 'SMB Warm Leads', status: 'active', leads: 523, called: 410, connected: 156, transferred: 82, converted: 31 },
-    { name: 'Re-engagement Campaign', status: 'paused', leads: 890, called: 890, connected: 134, transferred: 23, converted: 8 },
-  ]
+async function CampaignOverview() {
+  const campaigns = await getActiveCampaigns()
 
   return (
     <div className="glass-elevated rounded-2xl p-6">
@@ -223,7 +209,9 @@ function CampaignOverview() {
 
 // ─── Main Dashboard ─────────────────────────────────────────
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const stats = await getDashboardStats()
+
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
       {/* Background atmosphere */}
@@ -279,17 +267,17 @@ export default function Dashboard() {
         <div className="mb-8 animate-fade-up">
           <h1 className="text-2xl font-bold tracking-tight">Welcome back, James</h1>
           <p className="text-[var(--text-muted)] mt-1">
-            Your AI agents made <span className="text-[var(--accent)] font-semibold">847 calls</span> today and
-            booked <span className="text-[var(--accent)] font-semibold">23 meetings</span>
+            Your AI agents made <span className="text-[var(--accent)] font-semibold">{stats.calls.value} calls</span> today and
+            booked <span className="text-[var(--accent)] font-semibold">{stats.conversions.value} meetings</span>
           </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-6 animate-fade-up animate-fade-up-1">
-          <StatCard label="Calls Today" value="847" change="+12.5% vs yesterday" icon={Phone} />
-          <StatCard label="Connections" value="201" change="+8.3% vs yesterday" icon={PhoneCall} />
-          <StatCard label="Transfers" value="47" change="+15.2% vs yesterday" icon={TrendingUp} />
-          <StatCard label="Conversions" value="12" change="+33% vs yesterday" icon={Zap} accent />
+          <StatCard label="Calls Today" value={stats.calls.value.toString()} change={`${stats.calls.change} vs yesterday`} icon={Phone} />
+          <StatCard label="Connections" value={stats.connections.value.toString()} change={`${stats.connections.change} vs yesterday`} icon={PhoneCall} />
+          <StatCard label="Transfers" value={stats.transfers.value.toString()} change={`${stats.transfers.change} vs yesterday`} icon={TrendingUp} />
+          <StatCard label="Conversions" value={stats.conversions.value.toString()} change={`${stats.conversions.change} vs yesterday`} icon={Zap} accent />
         </div>
 
         {/* Main Grid */}
