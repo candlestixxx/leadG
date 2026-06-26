@@ -21,7 +21,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run worker
+      target: builder # Use the builder target so tsx and src files are available
+    command: npx tsx src/workers/campaign-worker.ts
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/voiceforge
       - REDIS_HOST=redis

@@ -12,11 +12,13 @@ const connection = {
   password: process.env.REDIS_PASSWORD
 }
 
-// Mock Queues for build process to avoid connection drops
-export const campaignQueue = process.env.NODE_ENV === 'production' ? { add: async () => {} } as any : new Queue('campaigns', { connection })
-export const callQueue = process.env.NODE_ENV === 'production' ? { add: async () => {} } as any : new Queue('calls', { connection })
-export const emailQueue = process.env.NODE_ENV === 'production' ? { add: async () => {} } as any : new Queue('emails', { connection })
-export const smsQueue = process.env.NODE_ENV === 'production' ? { add: async () => {} } as any : new Queue('sms', { connection })
+// We cannot connect to Redis during Next.js static generation (build phase).
+const isBuildPhase = process.env.npm_lifecycle_event === 'build';
+
+export const campaignQueue = isBuildPhase ? { add: async () => {} } as any : new Queue('campaigns', { connection })
+export const callQueue = isBuildPhase ? { add: async () => {} } as any : new Queue('calls', { connection })
+export const emailQueue = isBuildPhase ? { add: async () => {} } as any : new Queue('emails', { connection })
+export const smsQueue = isBuildPhase ? { add: async () => {} } as any : new Queue('sms', { connection })
 
 // ─── Campaign Engine ────────────────────────────────────────
 

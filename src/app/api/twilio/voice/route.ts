@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Matthew">${greeting}</Say>
+  <Say voice="Polly.Matthew">${escapeXml(greeting)}</Say>
   <Gather input="speech" action="/api/twilio/gather?agentId=${agentId}&leadId=${leadId}&campaignId=${campaignId}&callSid=${callSid}"
           speechTimeout="auto" speechModel="phone_call" language="en-US" enhanced="true">
   </Gather>
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     const transferNumber = process.env.TRANSFER_NUMBER || '+15551234567'
     twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Matthew">${result.response}</Say>
+  <Say voice="Polly.Matthew">${escapeXml(result.response)}</Say>
   <Say voice="Polly.Matthew">Let me connect you with our team right away. One moment please.</Say>
   <Dial action="/api/twilio/transfer-complete?callSid=${callSid}" timeout="30">
     <Number>${transferNumber}</Number>
@@ -113,14 +113,14 @@ export async function POST(req: NextRequest) {
   } else if (result.action === 'end_call') {
     twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Matthew">${result.response}</Say>
+  <Say voice="Polly.Matthew">${escapeXml(result.response)}</Say>
   <Hangup/>
 </Response>`
   } else if (result.action === 'leave_voicemail') {
     const voicemailScript = await conversation.generateVoicemailScript()
     twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Matthew">${voicemailScript}</Say>
+  <Say voice="Polly.Matthew">${escapeXml(voicemailScript)}</Say>
   <Hangup/>
 </Response>`
 
@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
     // Continue conversation
     twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Matthew">${result.response}</Say>
+  <Say voice="Polly.Matthew">${escapeXml(result.response)}</Say>
   <Gather input="speech" action="/api/twilio/gather?agentId=${agentId}&leadId=${leadId}&campaignId=${campaignId}&callSid=${callSid}"
           speechTimeout="auto" speechModel="phone_call" language="en-US" enhanced="true">
   </Gather>
@@ -142,4 +142,13 @@ export async function POST(req: NextRequest) {
   }
 
   return new NextResponse(twiml, { headers: { 'Content-Type': 'text/xml' } })
+}
+
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
 }

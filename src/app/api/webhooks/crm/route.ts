@@ -12,17 +12,30 @@ export async function POST(req: NextRequest) {
 
     const token = authHeader.split(' ')[1]
 
-    // In a real application, you would lookup the integration record using this token to find the org.
-    // For this pilot, we assume a single valid webhook setup.
-    const integration = await prisma.integration.findFirst({
+    // Validate the token against integrations
+    const integrations = await prisma.integration.findMany({
       where: {
         type: 'WEBHOOK',
         isActive: true,
       }
     })
 
+    // Securely look for the token in the serialized credentials JSON
+    const integration = integrations.find(i => {
+      try {
+        const creds = i.credentials as Record<string, any>;
+        if (creds && creds.headers) {
+           const headers = JSON.parse(creds.headers);
+           return headers.Authorization === `Bearer ${token}` || headers.Authorization === token;
+        }
+        return false;
+      } catch {
+        return false;
+      }
+    })
+
     if (!integration) {
-        return NextResponse.json({ error: 'Integration not found' }, { status: 404 })
+        return NextResponse.json({ error: 'Integration not found or unauthorized' }, { status: 404 })
     }
 
     // 2. Parse Lead Data
