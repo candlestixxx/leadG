@@ -1,0 +1,525 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ORGANIZATION & USERS ───────────────────────────────────
+
+model Organization {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  plan            Plan     @default(FREE)
+  stripeCustomerId String?
+  settings        Json     @default("{}")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  users           User[]
+  aiAgents        AiAgent[]
+  campaigns       Campaign[]
+  leads           Lead[]
+  callLogs        CallLog[]
+  integrations    Integration[]
+  phoneNumbers    PhoneNumber[]
+  emailTemplates  EmailTemplate[]
+  smsTemplates    SmsTemplate[]
+  voicemailTemplates VoicemailTemplate[]
+}
+
+enum Plan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  passwordHash   String
+  firstName      String
+  lastName       String
+  role           UserRole     @default(MEMBER)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  phone          String?
+  isActive       Boolean      @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  campaignAssignments CampaignAssignment[]
+  transferredCalls    CallLog[]            @relation("TransferTarget")
+  createdCampaigns    Campaign[]
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+// ─── AI AGENT CONFIGURATION ─────────────────────────────────
+
+model AiAgent {
+  id              String   @id @default(cuid())
+  name            String
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  // Voice Configuration
+  voiceProvider   VoiceProvider @default(ELEVENLABS)
+  voiceId         String
+  voiceName       String
+  voiceGender     VoiceGender
+  voiceAccent     String   @default("american")
+  voiceAge        String   @default("adult")
+  voiceTone       String   @default("professional")
+  voiceSpeed      Float    @default(1.0)
+  voicePitch      Float    @default(1.0)
+
+  // Personality & Behavior
+  personality     Json     @default("{}")
+  systemPrompt    String   @db.Text
+  objectionHandling Json   @default("[]")
+  qualifyingQuestions Json @default("[]")
+
+  // Transfer Settings
+  transferThreshold Float   @default(0.7)
+  transferGreeting  String  @default("Let me connect you with a specialist who can help further.")
+
+  // Voicemail
+  voicemailScript   String? @db.Text
+  maxVoicemailDuration Int  @default(30)
+
+  // Learning
+  learningData      Json    @default("{}")
+  totalCallsHandled Int     @default(0)
+  successfulTransfers Int   @default(0)
+  avgSentimentScore Float   @default(0)
+
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  campaigns     Campaign[]
+  callLogs      CallLog[]
+}
+
+enum VoiceProvider {
+  ELEVENLABS
+  PLAYHT
+  AZURE_TTS
+  OPENAI_TTS
+  CARTESIA
+}
+
+enum VoiceGender {
+  MALE
+  FEMALE
+  NEUTRAL
+}
+
+// ─── LEAD MANAGEMENT ────────────────────────────────────────
+
+model Lead {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  firstName       String
+  lastName        String
+  email           String?
+  phone           String
+  company         String?
+  title           String?
+  source          String?
+  status          LeadStatus @default(NEW)
+  score           Int      @default(0)
+  tags            String[]
+  customFields    Json     @default("{}")
+
+  timezone        String?
+  bestTimeToCall  String?
+  dndChecked      Boolean  @default(false)
+  dndCheckedAt    DateTime?
+
+  // CRM sync
+  externalId      String?
+  crmType         String?
+  lastSyncedAt    DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  campaignLeads   CampaignLead[]
+  callLogs        CallLog[]
+
+  @@index([organizationId, status])
+  @@unique([organizationId, phone])
+  @@index([phone])
+  @@index([email])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  MEETING_SCHEDULED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+  UNQUALIFIED
+  DO_NOT_CONTACT
+  CALLBACK
+}
+
+// ─── CAMPAIGN ENGINE ────────────────────────────────────────
+
+model Campaign {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  aiAgentId       String?
+  aiAgent         AiAgent?    @relation(fields: [aiAgentId], references: [id])
+  createdById     String?
+  createdBy       User?       @relation(fields: [createdById], references: [id])
+
+  status          CampaignStatus @default(DRAFT)
+  type            CampaignType   @default(OUTBOUND_CALLING)
+
+  // Schedule
+  startDate       DateTime?
+  endDate         DateTime?
+  startTime       String?   // "09:00"
+  endTime         String?   // "17:00"
+  timezone        String    @default("America/New_York")
+  daysOfWeek      Int[]     @default([1,2,3,4,5]) // Mon-Fri
+
+  // Throttling
+  callsPerMinute  Int       @default(5)
+  callsPerHour    Int       @default(50)
+  callsPerDay     Int       @default(200)
+  maxConcurrent   Int       @default(3)
+
+  // Steps (the campaign sequence)
+  steps           CampaignStep[]
+
+  // Stats
+  totalLeads      Int       @default(0)
+  totalCalls      Int       @default(0)
+  totalConnected  Int       @default(0)
+  totalTransferred Int      @default(0)
+  totalConverted  Int       @default(0)
+
+  campaignLeads   CampaignLead[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum CampaignType {
+  OUTBOUND_CALLING
+  INBOUND_HANDLING
+  MULTI_CHANNEL
+  FOLLOW_UP
+}
+
+model CampaignStep {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  order       Int
+  type        StepType
+  templateId  String?   // references email/sms/voicemail template
+  delayValue  Int       @default(0)   // e.g., 2
+  delayUnit   DelayUnit @default(HOURS)
+
+  // For call steps
+  script      String?   @db.Text
+  maxAttempts Int       @default(3)
+
+  conditions  Json      @default("[]") // conditional branching
+
+  createdAt   DateTime @default(now())
+}
+
+enum StepType {
+  CALL
+  EMAIL
+  SMS
+  VOICEMAIL
+  WAIT
+  TASK
+  REMINDER
+  TRANSFER
+  CHECK_STATUS
+}
+
+enum DelayUnit {
+  MINUTES
+  HOURS
+  DAYS
+}
+
+model CampaignLead {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id])
+
+  status      CampaignLeadStatus @default(PENDING)
+  currentStep Int      @default(0)
+  attempts    Int      @default(0)
+  lastAttempt DateTime?
+  nextAttempt DateTime?
+  outcome     String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([campaignId, leadId])
+  @@index([campaignId, status])
+}
+
+enum CampaignLeadStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  TRANSFERRED
+  CONVERTED
+  FAILED
+  OPTED_OUT
+}
+
+model CampaignAssignment {
+  id          String   @id @default(cuid())
+  campaignId  String
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  role        String   @default("closer") // closer, observer
+  createdAt   DateTime @default(now())
+}
+
+// ─── CALL LOGGING ───────────────────────────────────────────
+
+model CallLog {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  leadId          String?
+  lead            Lead?        @relation(fields: [leadId], references: [id])
+  aiAgentId       String?
+  aiAgent         AiAgent?     @relation(fields: [aiAgentId], references: [id])
+
+  // Call details
+  twilioCallSid   String?  @unique
+  direction       CallDirection
+  fromNumber      String
+  toNumber        String
+  status          CallStatus
+
+  // Timing
+  startedAt       DateTime @default(now())
+  answeredAt      DateTime?
+  endedAt         DateTime?
+  duration        Int?     @default(0) // seconds
+  ringDuration    Int?     @default(0)
+
+  // AI Analysis
+  transcript      String?  @db.Text
+  summary         String?  @db.Text
+  sentiment       Float?   // -1 to 1
+  buyingSignals   Json     @default("[]")
+  objections      Json     @default("[]")
+  outcome         CallOutcome?
+
+  // Transfer
+  transferredTo   String?
+  transferTarget  User?    @relation("TransferTarget", fields: [transferredTo], references: [id])
+  transferredAt   DateTime?
+
+  // Recording
+  recordingUrl    String?
+  recordingSid    String?
+  recordingDuration Int?
+
+  // Voicemail
+  voicemailLeft   Boolean  @default(false)
+  voicemailUrl    String?
+
+  // Metadata
+  campaignId      String?
+  campaignStepId  String?
+  cost            Float?
+  notes           String?  @db.Text
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId, startedAt])
+  @@index([leadId])
+  @@index([twilioCallSid])
+}
+
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CallStatus {
+  QUEUED
+  RINGING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  NO_ANSWER
+  BUSY
+  VOICEMAIL
+  TRANSFERRED
+}
+
+enum CallOutcome {
+  INTERESTED
+  NOT_INTERESTED
+  CALLBACK_REQUESTED
+  MEETING_SCHEDULED
+  QUALIFIED
+  UNQUALIFIED
+  WRONG_NUMBER
+  DO_NOT_CALL
+  VOICEMAIL_LEFT
+  NO_ANSWER
+  TRANSFERRED
+}
+
+// ─── TEMPLATES ──────────────────────────────────────────────
+
+model EmailTemplate {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  name            String
+  subject         String
+  body            String   @db.Text
+  variables       String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SmsTemplate {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  name            String
+  body            String   @db.Text
+  variables       String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model VoicemailTemplate {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  name            String
+  audioUrl        String?
+  script          String?  @db.Text
+  voiceId         String?
+  duration        Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ─── INTEGRATIONS ───────────────────────────────────────────
+
+model Integration {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  type            IntegrationType
+  name            String
+  credentials     Json     // encrypted
+  settings        Json     @default("{}")
+  isActive        Boolean  @default(true)
+  lastSyncAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([organizationId, type])
+}
+
+enum IntegrationType {
+  TWILIO
+  ELEVENLABS
+  SALESFORCE
+  HUBSPOT
+  GOHIGHLEVEL
+  ZAPIER
+  SENDGRID
+  SMTP
+  WEBHOOK
+}
+
+model PhoneNumber {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  phoneNumber     String   @unique
+  friendlyName    String?
+  twilioSid       String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}
+
+// ─── SCHEDULING ─────────────────────────────────────────────
+
+model ScheduledEvent {
+  id          String   @id @default(cuid())
+  leadId      String?
+  type        EventType
+  title       String
+  description String?
+  scheduledAt DateTime
+  duration    Int?     // minutes
+  assignedTo  String?
+  status      EventStatus @default(SCHEDULED)
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum EventType {
+  CALLBACK
+  MEETING
+  FOLLOWUP_CALL
+  CONFIRMATION_CALL
+  TASK
+  REMINDER
+}
+
+enum EventStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
