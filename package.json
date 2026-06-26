@@ -11,7 +11,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "worker": "tsx src/workers/campaign-worker.ts",
     "test": "jest",
-    "simulate:crm": "tsx scripts/simulate-crm-webhook.ts"
+    "simulate:crm": "tsx scripts/simulate-crm-webhook.ts",
+    "test:pilot": "bash scripts/start-pilot-and-simulate.sh"
   },
   "dependencies": {
     "@deepgram/sdk": "^3.5.0",
