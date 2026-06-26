@@ -12,7 +12,8 @@
     "worker": "tsx src/workers/campaign-worker.ts",
     "test": "jest",
     "simulate:crm": "tsx scripts/simulate-crm-webhook.ts",
-    "test:pilot": "bash scripts/start-pilot-and-simulate.sh"
+    "test:pilot": "bash scripts/start-pilot-and-simulate.sh",
+    "sync:crm": "tsx scripts/sync-crm.ts"
   },
   "dependencies": {
     "@deepgram/sdk": "^3.5.0",
