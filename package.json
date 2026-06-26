@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "worker": "tsx src/workers/campaign-worker.ts",
-    "test": "jest"
+    "test": "jest",
+    "simulate:crm": "tsx scripts/simulate-crm-webhook.ts"
   },
   "dependencies": {
     "@deepgram/sdk": "^3.5.0",
