@@ -4,6 +4,7 @@ import {
   Mic, Settings, Play, Pause, MoreVertical, Search, Bell
 } from 'lucide-react'
 import { getDashboardStats, getActiveCalls, getRecentOutcomes, getActiveCampaigns } from './actions/dashboard'
+import { LiveAudioMonitor } from '@/components/LiveAudioMonitor'
 
 // ─── Dashboard Stats Card ───────────────────────────────────
 
@@ -79,6 +80,7 @@ async function LiveCallCard() {
             </div>
 
             <div className="flex items-center gap-3">
+              <LiveAudioMonitor callSid={`mock-sid-${call.id}`} agentId={call.agent} />
               <span className="text-xs px-2 py-1 rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
                 {call.phase}
               </span>
