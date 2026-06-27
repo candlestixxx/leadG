@@ -46,6 +46,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Missing required lead fields (phone, firstName)' }, { status: 400 })
     }
 
+    // Extract dynamic custom fields from payload (excluding standard fields)
+    const standardFields = ['firstName', 'lastName', 'email', 'phone', 'company', 'source', 'campaignId']
+    const customFields: Record<string, any> = {}
+    for (const key in payload) {
+      if (!standardFields.includes(key)) {
+         customFields[key] = payload[key]
+      }
+    }
+
     // 3. Upsert Lead
     const lead = await prisma.lead.upsert({
       where: {
@@ -59,7 +68,8 @@ export async function POST(req: NextRequest) {
         lastName: payload.lastName || '',
         email: payload.email,
         company: payload.company,
-        status: 'NEW'
+        status: 'NEW',
+        customFields
       },
       create: {
         organizationId: integration.organizationId,
@@ -69,7 +79,8 @@ export async function POST(req: NextRequest) {
         phone: payload.phone,
         company: payload.company,
         status: 'NEW',
-        source: payload.source || 'Webhook CRM'
+        source: payload.source || 'Webhook CRM',
+        customFields
       }
     })
 

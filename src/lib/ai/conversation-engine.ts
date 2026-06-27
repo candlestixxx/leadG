@@ -366,9 +366,11 @@ ${p.prohibitedTopics?.length ? `\n## PROHIBITED TOPICS\nDo not discuss: ${p.proh
 Name: ${lead.firstName} ${lead.lastName}
 ${lead.company ? `Company: ${lead.company}` : ''}
 ${lead.title ? `Title: ${lead.title}` : ''}
-${lead.customFields ? `Additional Info: ${JSON.stringify(lead.customFields)}` : ''}
-Use this information to personalize your conversation naturally.
-Don't reveal that you have this information unless appropriate.`
+${lead.customFields ? `Context / Custom Variables:
+${Object.entries(lead.customFields).map(([key, val]) => `- ${key}: ${val}`).join('\n')}` : ''}
+
+Use this information to heavily personalize your conversation naturally. If a context variable gives a specific reason for calling (e.g. "need"), adapt your greeting and pitch to directly address it.
+Don't reveal that you are reading from a CRM, sound completely human and natural.`
   }
 
   async generateVoicemailScript(): Promise<string> {
