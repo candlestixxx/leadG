@@ -211,6 +211,10 @@ model Campaign {
   callsPerDay     Int       @default(200)
   maxConcurrent   Int       @default(3)
 
+  // A/B Testing
+  isAbTesting     Boolean   @default(false)
+  abTestVariants  Json      @default("[]") // [{ id: 'A', weight: 50, aiAgentId: '...' }, { id: 'B', weight: 50, aiAgentId: '...' }]
+
   // Steps (the campaign sequence)
   steps           CampaignStep[]
 
@@ -293,6 +297,7 @@ model CampaignLead {
   lastAttempt DateTime?
   nextAttempt DateTime?
   outcome     String?
+  abVariantId String?  // "A" or "B", assigned dynamically during processing
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
