@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getAgent } from '@/app/actions/agents'
-import { ArrowLeft, Bot, Save, Mic, Settings, Activity } from 'lucide-react'
+import { ArrowLeft, Bot, Save, Mic, Settings, Activity, Play } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function AgentEditorPage({ params }: { params: { id: string } }) {
