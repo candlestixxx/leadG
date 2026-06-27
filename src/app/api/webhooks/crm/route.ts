@@ -84,9 +84,13 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    // 4. Optionally, add to an active campaign if specified in payload
+    // 4. Automatically Route Lead or add to explicitly specified campaign
     if (payload.campaignId) {
        await campaignEngine.addLeadToCampaign(payload.campaignId, lead.id)
+    } else {
+       // Import dynamic router
+       const { leadRouter } = await import('@/lib/crm/lead-router')
+       await leadRouter.routeLead(lead)
     }
 
     return NextResponse.json({ status: 'success', leadId: lead.id })
