@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     recordingUrl
   })
 
-  // If call completed, sync to CRM
+  // If call completed, sync to CRM and trigger reflection engine
   if (callStatus === 'completed') {
     const callLog = await prisma.callLog.findUnique({
       where: { twilioCallSid: callSid },
@@ -29,6 +29,17 @@ export async function POST(req: NextRequest) {
         await crmSyncService.pushCallToCrm(callLog.organizationId, callLog.id)
       } catch (error) {
         console.error('CRM sync error:', error)
+      }
+
+      try {
+        const { ReflectionEngine } = await import('@/lib/ai/reflection-engine')
+        const OpenAI = (await import('openai')).default
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy' })
+        const reflection = new ReflectionEngine(openai)
+        // Run asynchronously without blocking the webhook response
+        reflection.analyzeCallTranscript(callLog.id).catch(console.error)
+      } catch (error) {
+        console.error('Reflection engine error:', error)
       }
     }
   }
