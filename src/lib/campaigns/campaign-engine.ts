@@ -265,18 +265,51 @@ export class CampaignEngine {
         break
 
       case 'EMAIL':
+        let emailBody = step.script || 'Following up on our call.'
+        let emailSubject = 'Following up'
+
+        if (step.templateId) {
+           const template = await prisma.emailTemplate.findUnique({ where: { id: step.templateId } })
+           if (template) {
+              emailBody = template.body
+              emailSubject = template.subject
+           }
+        }
+
+        // Hydrate variables
+        emailBody = emailBody.replace(/{firstName}/g, campaignLead.lead.firstName)
+                             .replace(/{company}/g, campaignLead.lead.company || '')
+
         await emailQueue.add('send-email', {
           campaignLeadId,
           templateId: step.templateId,
-          leadId: campaignLead.leadId
+          leadId: campaignLead.leadId,
+          to: campaignLead.lead.email,
+          subject: emailSubject,
+          body: emailBody
         })
         break
 
       case 'SMS':
+        let smsBody = step.script || 'Following up on our call.'
+
+        if (step.templateId) {
+           const template = await prisma.smsTemplate.findUnique({ where: { id: step.templateId } })
+           if (template) {
+              smsBody = template.body
+           }
+        }
+
+        // Hydrate variables
+        smsBody = smsBody.replace(/{firstName}/g, campaignLead.lead.firstName)
+                         .replace(/{company}/g, campaignLead.lead.company || '')
+
         await smsQueue.add('send-sms', {
           campaignLeadId,
           templateId: step.templateId,
-          leadId: campaignLead.leadId
+          leadId: campaignLead.leadId,
+          to: campaignLead.lead.phone,
+          body: smsBody
         })
         break
 
