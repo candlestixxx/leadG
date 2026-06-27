@@ -13,7 +13,8 @@
     "test": "jest",
     "simulate:crm": "tsx scripts/simulate-crm-webhook.ts",
     "test:pilot": "bash scripts/start-pilot-and-simulate.sh",
-    "sync:crm": "tsx scripts/sync-crm.ts"
+    "sync:crm": "tsx scripts/sync-crm.ts",
+    "test:performance": "tsx scripts/load-test.ts"
   },
   "dependencies": {
     "@deepgram/sdk": "^3.5.0",
