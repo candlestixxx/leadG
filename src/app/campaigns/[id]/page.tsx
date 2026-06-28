@@ -142,6 +142,38 @@ export default async function CampaignEditorPage({ params }: { params: { id: str
             </div>
 
             <div className="glass-elevated rounded-xl p-5">
+               <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-[var(--text-primary)]">A/B Testing</h3>
+                  <div className={`w-10 h-5 rounded-full p-1 transition-colors ${safeCampaign.isAbTesting ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'}`}>
+                     <div className={`w-3 h-3 rounded-full bg-white transition-transform ${safeCampaign.isAbTesting ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </div>
+               </div>
+
+               {safeCampaign.isAbTesting && (
+                  <div className="space-y-4 pt-2 border-t border-[var(--border-subtle)]">
+                     <div className="p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]">
+                        <div className="flex justify-between items-center mb-1">
+                           <span className="text-xs font-medium text-[var(--info)]">Variant A (Control)</span>
+                           <span className="text-xs text-[var(--text-muted)]">50%</span>
+                        </div>
+                        <div className="w-full bg-[var(--bg-tertiary)] h-1.5 rounded-full overflow-hidden">
+                           <div className="bg-[var(--info)] h-full" style={{ width: '50%' }} />
+                        </div>
+                     </div>
+                     <div className="p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]">
+                        <div className="flex justify-between items-center mb-1">
+                           <span className="text-xs font-medium text-[var(--warning)]">Variant B (Test)</span>
+                           <span className="text-xs text-[var(--text-muted)]">50%</span>
+                        </div>
+                        <div className="w-full bg-[var(--bg-tertiary)] h-1.5 rounded-full overflow-hidden">
+                           <div className="bg-[var(--warning)] h-full" style={{ width: '50%' }} />
+                        </div>
+                     </div>
+                  </div>
+               )}
+            </div>
+
+            <div className="glass-elevated rounded-xl p-5">
                <h3 className="font-semibold mb-4 text-[var(--text-primary)]">Live Metrics</h3>
                <div className="space-y-3">
                   <div className="flex justify-between items-center">

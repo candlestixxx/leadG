@@ -190,20 +190,41 @@ export class CampaignEngine {
 
     const currentStep = campaign.steps[0] // First step
     for (const campaignLead of leads) {
+      // A/B Testing Routing
+      let activeAgentId = campaign.aiAgentId!
+      let assignedVariant = campaignLead.abVariantId
+
+      if (campaign.isAbTesting && Array.isArray(campaign.abTestVariants) && campaign.abTestVariants.length > 0) {
+          if (!assignedVariant) {
+             // 50/50 split assignment logic
+             assignedVariant = Math.random() > 0.5 ? 'A' : 'B'
+          }
+
+          const variantConfig = (campaign.abTestVariants as any[]).find(v => v.id === assignedVariant)
+          if (variantConfig && variantConfig.aiAgentId) {
+             activeAgentId = variantConfig.aiAgentId
+          }
+      }
+
       // Update lead status
       await prisma.campaignLead.update({
         where: { id: campaignLead.id },
-        data: { status: 'IN_PROGRESS', lastAttempt: new Date(), attempts: { increment: 1 } }
+        data: {
+           status: 'IN_PROGRESS',
+           lastAttempt: new Date(),
+           attempts: { increment: 1 },
+           abVariantId: assignedVariant
+        }
       })
 
       try {
         await twilioService.makeCall({
           to: campaignLead.lead.phone,
           from: fromNumber,
-          agentId: campaign.aiAgentId!,
+          agentId: activeAgentId,
           leadId: campaignLead.leadId,
           campaignId: campaignId,
-          webhookUrl: `${process.env.BASE_URL}/api/twilio/voice?agentId=${campaign.aiAgentId}&leadId=${campaignLead.leadId}&campaignId=${campaignId}&stepId=${currentStep?.id}`
+          webhookUrl: `${process.env.BASE_URL}/api/twilio/voice?agentId=${activeAgentId}&leadId=${campaignLead.leadId}&campaignId=${campaignId}&stepId=${currentStep?.id}`
         })
 
         // Update campaign stats
