@@ -7,13 +7,34 @@ import OpenAI from 'openai'
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || "dummy" })
 
 export class TwilioService {
-  private client: twilio.Twilio
+  private globalClient: twilio.Twilio
 
   constructor() {
-    this.client = twilio(
-      process.env.TWILIO_ACCOUNT_SID!,
-      process.env.TWILIO_AUTH_TOKEN!
+    this.globalClient = twilio(
+      process.env.TWILIO_ACCOUNT_SID || 'ACdummy',
+      process.env.TWILIO_AUTH_TOKEN || 'dummy'
     )
+  }
+
+  // Dynamically resolves the Twilio client for a specific organization (multi-tenant)
+  private async getClientForOrg(organizationId: string): Promise<twilio.Twilio> {
+    try {
+       const integration = await prisma.integration.findUnique({
+          where: { organizationId_type: { organizationId, type: 'TWILIO' } }
+       })
+
+       if (integration && integration.isActive) {
+          const creds = integration.credentials as Record<string, any>
+          if (creds.accountSid && creds.authToken) {
+             return twilio(creds.accountSid, creds.authToken)
+          }
+       }
+    } catch (e) {
+       console.error(`[TwilioService] Failed to fetch integration for org ${organizationId}:`, e)
+    }
+
+    // Fallback to global environment variables
+    return this.globalClient
   }
 
   // ─── Outbound Call ────────────────────────────────────────
@@ -26,7 +47,10 @@ export class TwilioService {
     campaignId?: string
     webhookUrl: string
   }): Promise<string> {
-    const call = await this.client.calls.create({
+    const orgId = await this.getOrgId(params.agentId)
+    const activeClient = await this.getClientForOrg(orgId)
+
+    const call = await activeClient.calls.create({
       to: params.to,
       from: params.from,
       url: params.webhookUrl,
@@ -153,7 +177,14 @@ export class TwilioService {
 
     twiml.dial({ action: `${process.env.BASE_URL}/api/twilio/transfer-complete`, timeout: 30 }).number(transferTo)
 
-    await this.client.calls(callSid).update({
+    // Fetch active client dynamically based on the call log
+    let activeClient = this.globalClient
+    const callLog = await prisma.callLog.findUnique({ where: { twilioCallSid: callSid } })
+    if (callLog) {
+       activeClient = await this.getClientForOrg(callLog.organizationId)
+    }
+
+    await activeClient.calls(callSid).update({
       twiml: twiml.toString()
     })
 
@@ -174,7 +205,14 @@ export class TwilioService {
     twiml.play(audioUrl)
     twiml.hangup()
 
-    await this.client.calls(callSid).update({
+    // Fetch active client dynamically based on the call log
+    let activeClient = this.globalClient
+    const callLog = await prisma.callLog.findUnique({ where: { twilioCallSid: callSid } })
+    if (callLog) {
+       activeClient = await this.getClientForOrg(callLog.organizationId)
+    }
+
+    await activeClient.calls(callSid).update({
       twiml: twiml.toString()
     })
 
