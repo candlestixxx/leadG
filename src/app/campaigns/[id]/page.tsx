@@ -127,16 +127,16 @@ export default async function CampaignEditorPage({ params }: { params: { id: str
                   <div>
                      <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wider">AI Agent Assigned</label>
                      <select className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]" disabled>
-                        <option>{safeCampaign.aiAgent?.name || 'Loading...'}</option>
+                        <option>{((safeCampaign as any).aiAgent)?.name || 'Loading...'}</option>
                      </select>
                   </div>
                   <div>
                      <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wider">Daily Call Limit</label>
-                     <input type="number" value={safeCampaign.callsPerDay || 200} readOnly className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none" />
+                     <input type="number" value={((safeCampaign as any).callsPerDay) || 200} readOnly className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none" />
                   </div>
                   <div>
                      <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-wider">Timezone</label>
-                     <input type="text" value={safeCampaign.timezone || 'America/New_York'} readOnly className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none" />
+                     <input type="text" value={((safeCampaign as any).timezone) || 'America/New_York'} readOnly className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] focus:outline-none" />
                   </div>
                </div>
             </div>
@@ -144,12 +144,12 @@ export default async function CampaignEditorPage({ params }: { params: { id: str
             <div className="glass-elevated rounded-xl p-5">
                <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-[var(--text-primary)]">A/B Testing</h3>
-                  <div className={`w-10 h-5 rounded-full p-1 transition-colors ${safeCampaign.isAbTesting ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'}`}>
-                     <div className={`w-3 h-3 rounded-full bg-white transition-transform ${safeCampaign.isAbTesting ? 'translate-x-5' : 'translate-x-0'}`} />
+                  <div className={`w-10 h-5 rounded-full p-1 transition-colors ${((safeCampaign as any).isAbTesting) ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'}`}>
+                     <div className={`w-3 h-3 rounded-full bg-white transition-transform ${((safeCampaign as any).isAbTesting) ? 'translate-x-5' : 'translate-x-0'}`} />
                   </div>
                </div>
 
-               {safeCampaign.isAbTesting && (
+               {((safeCampaign as any).isAbTesting) && (
                   <div className="space-y-4 pt-2 border-t border-[var(--border-subtle)]">
                      <div className="p-3 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]">
                         <div className="flex justify-between items-center mb-1">

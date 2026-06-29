@@ -38,7 +38,7 @@ export async function getAnalyticsData() {
          select: { objectionHandling: true }
       })
 
-      let learnedObjections = []
+      let learnedObjections: any[] = []
       if (agent && Array.isArray(agent.objectionHandling)) {
           // Filter to only objects that were "learned" (have learnedFromCallId)
           learnedObjections = agent.objectionHandling.filter((obj: any) => obj.learnedFromCallId)
