@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { BarChart3, Activity, Users, Zap } from 'lucide-react'
 import { getAnalyticsData } from '../actions/analytics'
 

@@ -1,12 +1,25 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+
   web:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - '3000:3000'
+    # Exposing port to host is removed since NGINX routes traffic internally now
+    expose:
+      - '3000'
+    deploy:
+      replicas: 3 # Scale the Next.js API instances behind the NGINX load balancer
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/voiceforge
       - REDIS_HOST=redis

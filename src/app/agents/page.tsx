@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Bot, Plus, Activity, PhoneCall, ArrowUpRight, Search, Zap, Bell, Settings } from 'lucide-react'
 import { getAgents } from '../actions/agents'
 import Link from 'next/link'

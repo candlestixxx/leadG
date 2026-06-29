@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import {
   Phone, TrendingUp, Users, Zap, Clock, ArrowUpRight,
   Activity, BarChart3, PhoneCall, PhoneIncoming, PhoneOutgoing,

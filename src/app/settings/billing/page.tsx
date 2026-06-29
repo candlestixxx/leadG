@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Settings as SettingsIcon, Shield, Webhook, Zap, Key, Link as LinkIcon, Users, CreditCard, Check } from 'lucide-react'
 import Link from 'next/link'
 import { getBillingDetails, createCheckoutSession } from '@/app/actions/billing'

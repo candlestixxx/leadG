@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Users, Search, Trash2, ArrowUpRight, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import { getLeads } from '../actions/leads'
 import Link from 'next/link'

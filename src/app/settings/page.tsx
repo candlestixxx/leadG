@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Settings as SettingsIcon, Shield, Webhook, Zap, Key, Link as LinkIcon, Users } from 'lucide-react'
 import { getIntegrations } from '../actions/settings'
 import Link from 'next/link'
