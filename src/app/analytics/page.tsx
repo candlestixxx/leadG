@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
-import { BarChart3, Activity, Users, Zap } from 'lucide-react'
+import {  BarChart3, Activity, Users, Zap , Info } from 'lucide-react'
+import { Tooltip } from '@/components/ui/tooltip'
 import { getAnalyticsData } from '../actions/analytics'
 
 export default async function AnalyticsDashboard() {

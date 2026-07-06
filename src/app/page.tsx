@@ -3,17 +3,14 @@ import {
   Phone, TrendingUp, Users, Zap, Clock, ArrowUpRight,
   Activity, BarChart3, PhoneCall, PhoneIncoming, PhoneOutgoing,
   Mic, Settings, Play, Pause, MoreVertical, Search, Bell
-} from 'lucide-react'
+, Info } from 'lucide-react'
+import { Tooltip } from '@/components/ui/tooltip'
 import { getDashboardStats, getActiveCalls, getRecentOutcomes, getActiveCampaigns } from './actions/dashboard'
 import { LiveAudioMonitor } from '@/components/LiveAudioMonitor'
 
 // ─── Dashboard Stats Card ───────────────────────────────────
 
-function StatCard({
-  label, value, change, icon: Icon, accent = false
-}: {
-  label: string; value: string; change: string; icon: any; accent?: boolean
-}) {
+function StatCard({ label, value, change, icon: Icon, accent = false, tooltip = "" }: { label: string; value: string; change: string; icon: any; accent?: boolean, tooltip?: string }) {
   return (
     <div className={`
       relative overflow-hidden rounded-2xl p-6 transition-all duration-300
@@ -24,9 +21,16 @@ function StatCard({
     `}>
       <div className="flex items-start justify-between">
         <div>
-          <p className={`text-sm font-medium mb-1 ${accent ? 'opacity-80' : 'text-[var(--text-muted)]'}`}>
-            {label}
-          </p>
+          <div className="flex items-center gap-1 mb-1">
+            <p className={`text-sm font-medium ${accent ? 'opacity-80' : 'text-[var(--text-muted)]'}`}>
+              {label}
+            </p>
+            {tooltip && (
+              <Tooltip content={tooltip}>
+                <Info className="w-3.5 h-3.5 text-[var(--text-muted)] cursor-help" />
+              </Tooltip>
+            )}
+          </div>
           <p className={`text-3xl font-bold tracking-tight ${accent ? '' : 'text-[var(--text-primary)]'}`}>
             {value}
           </p>
@@ -277,10 +281,10 @@ export default async function Dashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4 mb-6 animate-fade-up animate-fade-up-1">
-          <StatCard label="Calls Today" value={stats.calls.value.toString()} change={`${stats.calls.change} vs yesterday`} icon={Phone} />
-          <StatCard label="Connections" value={stats.connections.value.toString()} change={`${stats.connections.change} vs yesterday`} icon={PhoneCall} />
-          <StatCard label="Transfers" value={stats.transfers.value.toString()} change={`${stats.transfers.change} vs yesterday`} icon={TrendingUp} />
-          <StatCard label="Conversions" value={stats.conversions.value.toString()} change={`${stats.conversions.change} vs yesterday`} icon={Zap} accent />
+          <StatCard label="Calls Today" value={stats.calls.value.toString()} change={`${stats.calls.change} vs yesterday`} icon={Phone} tooltip="Total number of outbound and inbound calls handled by all AI agents today." />
+          <StatCard label="Connections" value={stats.connections.value.toString()} change={`${stats.connections.change} vs yesterday`} icon={PhoneCall} tooltip="Calls that were answered by a human and lasted longer than 10 seconds." />
+          <StatCard label="Transfers" value={stats.transfers.value.toString()} change={`${stats.transfers.change} vs yesterday`} icon={TrendingUp} tooltip="Calls where the AI agent successfully live-transferred the prospect to a human closer." />
+          <StatCard label="Conversions" value={stats.conversions.value.toString()} change={`${stats.conversions.change} vs yesterday`} icon={Zap} accent tooltip="Total number of qualified leads resulting in a scheduled meeting or successful transfer." />
         </div>
 
         {/* Main Grid */}

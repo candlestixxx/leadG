@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
-import { Users, Search, Trash2, ArrowUpRight, CheckCircle2, XCircle, Clock } from 'lucide-react'
+import {  Users, Search, Trash2, ArrowUpRight, CheckCircle2, XCircle, Clock , Info } from 'lucide-react'
+import { Tooltip } from '@/components/ui/tooltip'
 import { getLeads } from '../actions/leads'
 import Link from 'next/link'
 
