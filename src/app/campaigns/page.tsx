@@ -54,7 +54,7 @@ export default async function CampaignsPage() {
       <main className="max-w-[1600px] mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Smart Campaigns</h1>
+            <div className="flex items-center gap-2"><h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Smart Campaigns</h1><Tooltip content="Manage your outbound and inbound AI calling sequences"><Info className="w-4 h-4 text-[var(--text-muted)] cursor-help" /></Tooltip></div>
             <p className="text-[var(--text-muted)] mt-1">Manage automated multi-channel sequences and outbound dialers.</p>
           </div>
           <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)] text-[var(--bg-primary)] font-semibold hover:bg-[var(--accent-dim)] transition-colors">

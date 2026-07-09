@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getAgent } from '@/app/actions/agents'
-import { ArrowLeft, Bot, Save, Mic, Settings, Activity, Play } from 'lucide-react'
+import {  ArrowLeft, Bot, Save, Mic, Settings, Activity, Play , Info } from 'lucide-react'
+import { Tooltip } from '@/components/ui/tooltip'
 import Link from 'next/link'
 
 export default async function AgentEditorPage({ params }: { params: { id: string } }) {
@@ -46,7 +47,7 @@ export default async function AgentEditorPage({ params }: { params: { id: string
              <div className="glass-elevated rounded-xl p-6">
                  <div className="flex items-center gap-2 mb-4">
                      <Settings className="w-5 h-5 text-[var(--accent)]" />
-                     <h2 className="text-lg font-semibold">Core Identity & Prompt</h2>
+                     <div className="flex items-center gap-2"><h2 className="text-lg font-semibold">Core Identity & Prompt</h2><Tooltip content="Define the base instructions, goals, and behavioral guardrails for this AI agent"><Info className="w-4 h-4 text-[var(--text-muted)] cursor-help" /></Tooltip></div>
                  </div>
                  <div className="space-y-4">
                      <div>
@@ -63,7 +64,7 @@ export default async function AgentEditorPage({ params }: { params: { id: string
                  <div className="flex items-center justify-between mb-4">
                      <div className="flex items-center gap-2">
                          <Activity className="w-5 h-5 text-[var(--warning)]" />
-                         <h2 className="text-lg font-semibold">Learned Objection Handlers</h2>
+                         <div className="flex items-center gap-2"><h2 className="text-lg font-semibold">Learned Objection Handlers</h2><Tooltip content="The Reflection Engine automatically extracts successful rebuttals from past calls and injects them here to improve future conversions"><Info className="w-4 h-4 text-[var(--text-muted)] cursor-help" /></Tooltip></div>
                      </div>
                      <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-secondary)] px-2 py-1 rounded-md border border-[var(--border)]">
                          Auto-updated via Reflection Engine
@@ -88,7 +89,7 @@ export default async function AgentEditorPage({ params }: { params: { id: string
             <div className="glass-elevated rounded-xl p-5">
                <div className="flex items-center gap-2 mb-4">
                    <Mic className="w-4 h-4 text-[var(--info)]" />
-                   <h3 className="font-semibold text-[var(--text-primary)]">Voice Synthesis</h3>
+                   <div className="flex items-center gap-2"><h3 className="font-semibold text-[var(--text-primary)]">Voice Synthesis</h3><Tooltip content="Configure the acoustic properties of the agent's voice using providers like ElevenLabs"><Info className="w-4 h-4 text-[var(--text-muted)] cursor-help" /></Tooltip></div>
                </div>
                <div className="space-y-4">
                   <div>
