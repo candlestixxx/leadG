@@ -1,8 +1,8 @@
 import { WebSocketServer, WebSocket } from 'ws'
-import { VoicePipeline } from '@/lib/ai/voice-pipeline'
-import { ConversationEngine } from '@/lib/ai/conversation-engine'
+import { VoicePipeline } from '../ai/voice-pipeline'
+import { ConversationEngine } from '../ai/conversation-engine'
 import OpenAI from 'openai'
-import { prisma } from '@/lib/db/prisma'
+import { prisma } from '../db/prisma'
 
 export function attachWebSocketServer(server: any) {
   const wss = new WebSocketServer({ server, path: '/api/twilio/stream' })
