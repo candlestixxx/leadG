@@ -1,7 +1,7 @@
 # VoiceForge AI - To Do
 
 ## Immediate Tasks
-- Implement WebRTC client for live real-time monitoring and barge-in (frontend dashboard to Twilio).
+- [x] Implement WebRTC client for live real-time monitoring and barge-in (frontend dashboard to Twilio).
 - [x] Integrate actual email logic via Nodemailer/SendGrid inside `src/workers/campaign-worker.ts`.
 - [x] Integrate actual SMS logic via Twilio inside `src/workers/campaign-worker.ts`.
 - Address CI static build phase issues requiring database mocks.
