@@ -10,7 +10,7 @@ export default async function AnalyticsDashboard() {
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] p-8">
        <div className="max-w-[1600px] mx-auto">
           <div className="mb-8">
-             <h1 className="text-3xl font-bold tracking-tight">Analytics & Sentiment</h1>
+             <div className="flex items-center gap-2"><h1 className="text-3xl font-bold tracking-tight">Analytics & Sentiment</h1><Tooltip content="Review transcripts, sentiment analysis, and identified buying signals"><Info className="w-4 h-4 text-[var(--text-muted)] cursor-help" /></Tooltip></div>
              <p className="text-[var(--text-muted)] mt-2">Monitor system-wide agent performance and lead sentiment across campaigns.</p>
           </div>
 
@@ -50,7 +50,7 @@ export default async function AnalyticsDashboard() {
           </div>
 
           <div className="glass-elevated rounded-2xl p-6">
-              <h3 className="text-xl font-semibold mb-6">Recent Successful Agent Handlers</h3>
+              <div className="flex items-center gap-2 mb-6"><h3 className="text-xl font-semibold">Recent Successful Agent Handlers</h3><Tooltip content="Responses automatically generated and saved by the AI reflection engine from past successful calls"><Info className="w-4 h-4 text-[var(--text-muted)] cursor-help" /></Tooltip></div>
               <div className="space-y-4">
                  {data.learnedObjections.length === 0 ? (
                     <p className="text-sm text-[var(--text-muted)]">No learned objections yet. Connect live DB and complete reflection loops.</p>
