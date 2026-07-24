@@ -1,7 +1,14 @@
-// Auth middleware temporarily disabled for local dev without PostgreSQL
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { withAuth } from "next-auth/middleware"
 
-export function middleware(request: NextRequest) {
-  return NextResponse.next()
+export default withAuth({
+  pages: {
+    signIn: '/login',
+  },
+})
+
+// Protect all routes except the login page, API webhooks, and public assets
+export const config = {
+    matcher: [
+        "/((?!login|api/webhooks|api/twilio|_next/static|_next/image|favicon.ico).*)",
+    ]
 }

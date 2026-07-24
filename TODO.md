@@ -4,9 +4,9 @@
 - [x] Implement WebRTC client for live real-time monitoring and barge-in (frontend dashboard to Twilio).
 - [x] Integrate actual email logic via Nodemailer/SendGrid inside `src/workers/campaign-worker.ts`.
 - [x] Integrate actual SMS logic via Twilio inside `src/workers/campaign-worker.ts`.
-- Address CI static build phase issues requiring database mocks.
+- [x] Address CI static build phase issues requiring database mocks.
 
 ## Mid-Term Features
 - Enhanced User Dashboard for configuration and visual scripting.
-- Implement comprehensive user authentication (NextAuth/Clerk).
+- [x] Implement comprehensive user authentication (NextAuth/Clerk).
 - Setup A/B testing on multi-channel campaign sequences.

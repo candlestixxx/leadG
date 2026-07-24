@@ -2,16 +2,6 @@
 
 import { prisma } from '@/lib/db/prisma'
 
-// Helper to race DB queries against a timeout
-// Wraps in Promise.resolve() to handle Prisma's custom thenables
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  const realPromise = Promise.resolve(promise)
-  return Promise.race([
-    realPromise,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('DB timeout')), ms)),
-  ])
-}
-
 export async function getDashboardStats() {
   try {
     const today = new Date()
@@ -29,7 +19,7 @@ export async function getDashboardStats() {
       transfersYesterday,
       conversionsToday,
       conversionsYesterday,
-    ] = await withTimeout(Promise.all([
+    ] = await Promise.all([
       // Total Calls
       prisma.callLog.count({ where: { startedAt: { gte: today } } }),
       prisma.callLog.count({ where: { startedAt: { gte: yesterday, lt: today } } }),
@@ -45,7 +35,7 @@ export async function getDashboardStats() {
       // Conversions (Meetings or high intent)
       prisma.callLog.count({ where: { startedAt: { gte: today }, outcome: { in: ['MEETING_SCHEDULED', 'INTERESTED', 'QUALIFIED'] } } }),
       prisma.callLog.count({ where: { startedAt: { gte: yesterday, lt: today }, outcome: { in: ['MEETING_SCHEDULED', 'INTERESTED', 'QUALIFIED'] } } }),
-    ]), 5000)
+    ])
 
     return {
       calls: { value: callsToday, change: calculateChange(callsToday, callsYesterday) },
@@ -66,12 +56,12 @@ export async function getDashboardStats() {
 
 export async function getActiveCalls() {
   try {
-    const calls = await withTimeout(prisma.callLog.findMany({
+    const calls = await prisma.callLog.findMany({
       where: { status: 'IN_PROGRESS' },
       include: { lead: true, aiAgent: true },
       take: 5,
       orderBy: { startedAt: 'desc' }
-    }), 5000)
+    })
 
     return calls.map(c => ({
       id: c.id,
@@ -90,12 +80,12 @@ export async function getActiveCalls() {
 
 export async function getRecentOutcomes() {
   try {
-    const calls = await withTimeout(prisma.callLog.findMany({
+    const calls = await prisma.callLog.findMany({
       where: { status: { in: ['COMPLETED', 'TRANSFERRED', 'FAILED', 'NO_ANSWER'] } },
       include: { lead: true },
       take: 8,
       orderBy: { endedAt: 'desc' }
-    }), 5000)
+    })
 
     return calls.map(c => ({
       id: c.id,
@@ -113,11 +103,11 @@ export async function getRecentOutcomes() {
 
 export async function getActiveCampaigns() {
   try {
-    const campaigns = await withTimeout(prisma.campaign.findMany({
+    const campaigns = await prisma.campaign.findMany({
       where: { status: 'ACTIVE' },
       take: 4,
       orderBy: { createdAt: 'desc' }
-    }), 5000)
+    })
 
     return campaigns.map(c => ({
       name: c.name,
