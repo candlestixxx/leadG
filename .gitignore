@@ -1,3 +1,9 @@
 node_modules
 .next/
 .env.*.local
+
+# secrets & local artifacts
+.env
+*.log
+__pycache__/
+*.tsbuildinfo
