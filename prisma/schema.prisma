@@ -295,6 +295,7 @@ model CampaignLead {
   currentStep Int      @default(0)
   attempts    Int      @default(0)
   lastAttempt DateTime?
+  abVariantId String?
   nextAttempt DateTime?
   outcome     String?
   abVariantId String?  // "A" or "B", assigned dynamically during processing
