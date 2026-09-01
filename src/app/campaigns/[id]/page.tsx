@@ -1,6 +1,7 @@
+import { Tooltip } from '@/components/ui/tooltip'
 import { notFound } from 'next/navigation'
 import { getCampaign } from '@/app/actions/campaigns'
-import { ArrowLeft, Play, Pause, Clock, Phone, Mail, MessageSquare, Plus, Save, Activity } from 'lucide-react'
+import {  ArrowLeft, Play, Pause, Clock, Phone, Mail, MessageSquare, Plus, Save, Activity , Info } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function CampaignEditorPage({ params }: { params: { id: string } }) {
@@ -143,7 +144,7 @@ export default async function CampaignEditorPage({ params }: { params: { id: str
 
             <div className="glass-elevated rounded-xl p-5">
                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-[var(--text-primary)]">A/B Testing</h3>
+                  <div className="flex items-center gap-2"><h3 className="font-semibold text-[var(--text-primary)]">A/B Testing</h3><Tooltip content="Split traffic between different AI agents or scripts to optimize conversion rates"><Info className="w-4 h-4 text-[var(--text-muted)] cursor-help" /></Tooltip></div>
                   <div className={`w-10 h-5 rounded-full p-1 transition-colors ${((safeCampaign as any).isAbTesting) ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'}`}>
                      <div className={`w-3 h-3 rounded-full bg-white transition-transform ${((safeCampaign as any).isAbTesting) ? 'translate-x-5' : 'translate-x-0'}`} />
                   </div>
