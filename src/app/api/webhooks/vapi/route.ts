@@ -122,6 +122,26 @@ export async function POST(req: Request) {
     const crmProvider = getCrmProvider();
     await crmProvider.updateLead(lead.id, updatedLeadData as any);
 
+    // 9. Send to main CRM activity timeline
+    try {
+      const { sendVoiceEventToCRM } = await import('@/lib/webhooks/crm-voice');
+      sendVoiceEventToCRM({
+        callId: callId || 'unknown',
+        direction: 'outbound',
+        from: '',
+        to: lead.phone || '',
+        status: 'completed',
+        duration: durationSeconds,
+        transcript: transcript || undefined,
+        summary: summary || undefined,
+        outcome: newStatus || undefined,
+        leadEmail: lead.email || undefined,
+        leadPhone: lead.phone || undefined,
+      }).catch(console.error);
+    } catch (err) {
+      console.error('[Vapi Webhook] CRM voice webhook error:', err);
+    }
+
     return NextResponse.json({ success: true });
 
   } catch (error) {
