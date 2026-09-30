@@ -23,8 +23,8 @@ export function compileScript(scriptTemplate: string, data: Record<string, strin
 
 export function generateMockSummary(leadData: Record<string, string | null | undefined>, outcome: string): string {
   return `
-Lead Name: ${leadData.first_name} ${leadData.last_name}
-Lead Type: ${leadData.lead_type}
+Lead Name: ${leadData.firstName} ${leadData.lastName}
+Lead Type: ${leadData.leadType}
 Phone: ${leadData.phone || 'N/A'}
 Email: ${leadData.email || 'N/A'}
 Conversation Outcome: ${outcome}

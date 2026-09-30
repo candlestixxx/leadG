@@ -15,12 +15,12 @@ L.Icon.Default.mergeOptions({
 
 type Lead = {
   id: string;
-  first_name: string;
-  last_name: string;
-  property_address: string | null;
+  firstName: string;
+  lastName: string;
+  propertyAddress: string | null;
   latitude: number | null;
   longitude: number | null;
-  lead_type: string;
+  leadType: string;
 };
 
 type MapComponentProps = {
@@ -69,9 +69,9 @@ export default function MapComponent({ leads, targetCoords, radiusMiles }: MapCo
           <Marker key={lead.id} position={[lead.latitude, lead.longitude]}>
             <Popup>
               <div className="font-sans">
-                <h3 className="font-bold">{lead.first_name} {lead.last_name}</h3>
-                <p className="text-sm text-gray-600">{lead.property_address}</p>
-                <p className="text-xs bg-gray-100 rounded px-1 mt-1 inline-block">{lead.lead_type}</p>
+                <h3 className="font-bold">{lead.firstName} {lead.lastName}</h3>
+                <p className="text-sm text-gray-600">{lead.propertyAddress}</p>
+                <p className="text-xs bg-gray-100 rounded px-1 mt-1 inline-block">{lead.leadType}</p>
                 <a href={`/leads/${lead.id}`} className="block mt-2 text-blue-600 text-sm hover:underline">View Profile</a>
               </div>
             </Popup>

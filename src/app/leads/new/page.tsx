@@ -7,12 +7,12 @@ import Link from 'next/link';
 export default function NewLeadPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
-    lead_type: 'Buyer',
-    property_address: '',
+    leadType: 'Buyer',
+    propertyAddress: '',
     city: '',
     state: '',
     zip: '',
@@ -61,11 +61,11 @@ export default function NewLeadPage() {
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700">First Name</label>
-              <input required type="text" name="first_name" value={formData.first_name} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Last Name</label>
-              <input required type="text" name="last_name" value={formData.last_name} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -77,7 +77,7 @@ export default function NewLeadPage() {
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700">Lead Type</label>
-              <select name="lead_type" value={formData.lead_type} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+              <select name="leadType" value={formData.leadType} onChange={handleChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
                 <option value="Buyer">Buyer</option>
                 <option value="Seller">Seller</option>
                 <option value="Circle Prospecting">Circle Prospecting</option>
@@ -89,7 +89,7 @@ export default function NewLeadPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-xs font-medium text-gray-700">Street Address</label>
-                  <input type="text" name="property_address" value={formData.property_address} onChange={handleChange} placeholder="123 Main St" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+                  <input type="text" name="propertyAddress" value={formData.propertyAddress} onChange={handleChange} placeholder="123 Main St" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-700">City</label>

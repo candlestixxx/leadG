@@ -17,7 +17,7 @@ export const processWorkflowTick = inngest.createFunction(
         return await prisma.lead.findMany({
             where: {
                 activeWorkflowId: { not: null },
-                next_follow_up_at: { lte: now }
+                nextFollowUpAt: { lte: now }
             },
             include: {
                 activeWorkflow: { include: { steps: true } },
@@ -99,8 +99,8 @@ export const processWorkflowTick = inngest.createFunction(
 
             const leadUpdates = {
                 currentWorkflowDay: activeStep.day + 1,
-                next_follow_up_at: nextFollowUpDate,
-                status: "Contacted"
+                nextFollowUpAt: nextFollowUpDate,
+                status: 'CONTACTED' as const
             };
 
             await prisma.lead.update({
@@ -146,7 +146,7 @@ export const evaluateLeadPoolScoring = inngest.createFunction(
 
                 await prisma.lead.update({
                     where: { id: lead.id },
-                    data: { urgency_score: newScore }
+                    data: { urgencyScore: newScore }
                 });
             }
         });

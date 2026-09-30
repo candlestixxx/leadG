@@ -24,8 +24,8 @@ export async function GET(request: Request) {
 
     if (search) {
       whereClause.OR = [
-        { first_name: { contains: search } },
-        { last_name: { contains: search } },
+        { firstName: { contains: search } },
+        { lastName: { contains: search } },
         { email: { contains: search } },
         { phone: { contains: search } },
       ];
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     }
 
     if (type) {
-      whereClause.lead_type = type;
+      whereClause.leadType = type;
     }
 
     // Apply tenant isolation
@@ -68,8 +68,8 @@ export async function POST(request: Request) {
     let lat: number | null = null;
     let lon: number | null = null;
 
-    if (body.property_address && body.city && body.state && body.zip) {
-      const coords = await GeocodingAdapter.geocode(body.property_address, body.city, body.state, body.zip);
+    if (body.propertyAddress && body.city && body.state && body.zip) {
+      const coords = await GeocodingAdapter.geocode(body.propertyAddress, body.city, body.state, body.zip);
       if (coords) {
         lat = coords.latitude;
         lon = coords.longitude;
@@ -78,30 +78,30 @@ export async function POST(request: Request) {
 
     // Determine the workflow to assign based on lead type
     let targetWorkflow = null;
-    if (body.lead_type === 'Buyer') {
+    if (body.leadType === 'Buyer') {
       targetWorkflow = await prisma.followUpWorkflow.findFirst({ where: { name: 'Buyer 10-Day Blitz' } });
-    } else if (body.lead_type === 'Seller') {
+    } else if (body.leadType === 'Seller') {
       targetWorkflow = await prisma.followUpWorkflow.findFirst({ where: { name: 'Seller 14-Day Follow-Up' } });
     }
 
     const lead = await prisma.lead.create({
       data: {
-        first_name: body.first_name,
-        last_name: body.last_name,
+        firstName: body.firstName,
+        lastName: body.lastName,
         email: body.email,
         phone: body.phone,
-        property_address: body.property_address,
+        propertyAddress: body.propertyAddress,
         city: body.city,
         state: body.state,
         zip: body.zip,
         latitude: lat,
         longitude: lon,
-        lead_type: body.lead_type || 'Buyer',
+        leadType: body.leadType || 'Buyer',
         status: 'New',
         userId: user.id,
         activeWorkflowId: targetWorkflow ? targetWorkflow.id : undefined,
         currentWorkflowDay: targetWorkflow ? 0 : undefined,
-        next_follow_up_at: targetWorkflow ? new Date() : undefined, // Schedule immediately
+        nextFollowUpAt: targetWorkflow ? new Date() : undefined, // Schedule immediately
       },
     });
 

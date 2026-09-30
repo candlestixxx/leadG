@@ -68,7 +68,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          summary: `Showing / Meeting with ${lead.first_name} ${lead.last_name}`,
+          summary: `Showing / Meeting with ${lead.firstName} ${lead.lastName}`,
           description: `Automatically scheduled by Jules AI.\nPhone: ${lead.phone}\nEmail: ${lead.email}`,
           start: {
             dateTime: date.toISOString(),
@@ -85,7 +85,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
         return false;
       }
 
-      console.log(`Google Calendar: Successfully created appointment for ${lead.first_name} at ${date}`);
+      console.log(`Google Calendar: Successfully created appointment for ${lead.firstName} at ${date}`);
       return true;
     } catch (e) {
       console.error('Google Calendar Error:', e);
@@ -102,7 +102,7 @@ export class LobDirectMailProvider implements DirectMailProvider {
   async createMailTask(leadId: string, campaignType: string) {
     try {
       const lead = await prisma.lead.findUnique({ where: { id: leadId } });
-      if (!lead || !lead.property_address || !lead.city || !lead.state || !lead.zip) {
+      if (!lead || !lead.propertyAddress || !lead.city || !lead.state || !lead.zip) {
         throw new Error('Lead missing complete mailing address fields');
       }
 
@@ -127,8 +127,8 @@ export class LobDirectMailProvider implements DirectMailProvider {
         body: JSON.stringify({
           description: `Campaign: ${campaignType}`,
           to: {
-            name: `${lead.first_name} ${lead.last_name}`,
-            address_line1: lead.property_address,
+            name: `${lead.firstName} ${lead.lastName}`,
+            address_line1: lead.propertyAddress,
             address_city: lead.city,
             address_state: lead.state,
             address_zip: lead.zip
@@ -137,7 +137,7 @@ export class LobDirectMailProvider implements DirectMailProvider {
           front: "<html><body><h1>Exclusive Home Value Report for {{name}}</h1></body></html>",
           back: "<html><body><h1>Contact Jules Real Estate today!</h1></body></html>",
           merge_variables: {
-            name: lead.first_name
+            name: lead.firstName
           }
         }),
       });
@@ -146,7 +146,7 @@ export class LobDirectMailProvider implements DirectMailProvider {
         throw new Error(`Lob API error: ${response.status} ${response.statusText}`);
       }
 
-      console.log(`Lob: Successfully dispatched ${campaignType} postcard to ${lead.property_address}`);
+      console.log(`Lob: Successfully dispatched ${campaignType} postcard to ${lead.propertyAddress}`);
       return true;
     } catch (e) {
       console.error('Lob Direct Mail Error:', e);
@@ -200,7 +200,7 @@ export class VapiVoiceProvider implements VoiceProvider {
           phoneNumberId: 'your-vapi-phone-number-id', // Assuming static or from settings in a real app
           customer: {
             number: lead.phone,
-            name: `${lead.first_name} ${lead.last_name}`,
+            name: `${lead.firstName} ${lead.lastName}`,
           },
           assistantOverrides: {
             systemPrompt: `You are Jules, an AI real estate assistant. ${knowledgeContext}`,

@@ -48,7 +48,7 @@ export async function POST(req: Request) {
                 await prisma.appointment.create({
                     data: {
                         leadId: lead.id,
-                        agentId: lead.assigned_agent_id || "unassigned",
+                        agentId: lead.assignedAgentId || "unassigned",
                         date: targetDate,
                         notes: `Live AI Booking via Vapi Tool Call.`
                     }
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
                         data: {
                             userId: lead.userId,
                             title: 'Appointment Booked!',
-                            message: `Jules AI booked an appointment with ${lead.first_name} for ${targetDate.toLocaleString()}.`,
+                            message: `Jules AI booked an appointment with ${lead.firstName} for ${targetDate.toLocaleString()}.`,
                             linkUrl: `/leads/${lead.id}`
                         }
                     });

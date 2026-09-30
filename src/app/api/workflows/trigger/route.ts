@@ -30,19 +30,19 @@ export async function POST(request: Request) {
     const email = getEmailProvider();
 
     const scriptData: Record<string, any> = {
-      first_name: lead.first_name,
-      last_name: lead.last_name,
+      firstName: lead.firstName,
+      lastName: lead.lastName,
       agent_name: lead.agent?.name || 'Local Agent',
       area: lead.city || 'your area',
-      property_address: lead.property_address,
-      lead_type: lead.lead_type,
+      propertyAddress: lead.propertyAddress,
+      leadType: lead.leadType,
       timeline: lead.timeline,
       motivation: lead.motivation
     };
 
     if (action === 'call') {
       // Inject Live MLS Data for Buyers
-      if (lead.lead_type === 'Buyer' && lead.city) {
+      if (lead.leadType === 'Buyer' && lead.city) {
           const mls = getMlsProvider();
           const listings = await mls.fetchActiveListings(lead.city);
           if (listings.length > 0) {
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       }
 
       await voice.callLead(leadId);
-      const scriptToUse = lead.lead_type === 'Buyer' ? SCRIPTS.buyerFirstCall : SCRIPTS.sellerFirstCall;
+      const scriptToUse = lead.leadType === 'Buyer' ? SCRIPTS.buyerFirstCall : SCRIPTS.sellerFirstCall;
 
       // Inject the MLS context into the AI script if available
       let compiledScript = compileScript(scriptToUse, scriptData);
@@ -77,8 +77,8 @@ export async function POST(request: Request) {
         where: { id: leadId },
         data: {
           status: 'Warm Transfer Completed',
-          urgency_score: 90,
-          ai_summary: summaryText
+          urgencyScore: 90,
+          aiSummary: summaryText
         }
       });
 

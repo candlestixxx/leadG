@@ -85,15 +85,15 @@ export class FollowUpBossProvider implements CrmProvider {
       // We structure a typical FUB PUT payload
       const payload = {
         person: {
-          firstName: lead.first_name,
-          lastName: lead.last_name,
+          firstName: lead.firstName,
+          lastName: lead.lastName,
           emails: lead.email ? [{ value: lead.email }] : [],
           phones: lead.phone ? [{ value: lead.phone }] : [],
           stage: data.status === 'Hot Lead' ? 'Hot' : data.status,
-          tags: [lead.lead_type],
+          tags: [lead.leadType],
           customFields: {
-            UrgencyScore: lead.urgency_score,
-            AI_Summary: lead.ai_summary
+            UrgencyScore: lead.urgencyScore,
+            aiSummary: lead.aiSummary
           }
         }
       };
@@ -114,7 +114,7 @@ export class FollowUpBossProvider implements CrmProvider {
         body: JSON.stringify({
           source: "Jules AI Concierge",
           type: "Lead Update",
-          message: `Jules Status: ${data.status}. Score: ${lead.urgency_score}`,
+          message: `Jules Status: ${data.status}. Score: ${lead.urgencyScore}`,
           person: payload.person
         })
       });

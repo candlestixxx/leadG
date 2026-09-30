@@ -27,12 +27,12 @@ export default function ImportLeadsPage() {
         const cols = row.split(',');
         if (cols.length >= 2) {
           const payload = {
-            first_name: cols[0]?.trim() || 'Unknown',
-            last_name: cols[1]?.trim() || 'Lead',
+            firstName: cols[0]?.trim() || 'Unknown',
+            lastName: cols[1]?.trim() || 'Lead',
             email: cols[2]?.trim() || '',
             phone: cols[3]?.trim() || '',
-            lead_type: cols[4]?.trim() || 'Buyer',
-            property_address: cols[5]?.trim() || '',
+            leadType: cols[4]?.trim() || 'Buyer',
+            propertyAddress: cols[5]?.trim() || '',
             city: cols[6]?.trim() || '',
             state: cols[7]?.trim() || '',
             zip: cols[8]?.trim() || '',

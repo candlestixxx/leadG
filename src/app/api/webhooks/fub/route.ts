@@ -47,17 +47,17 @@ export async function POST(req: Request) {
 
       lead = await prisma.lead.create({
         data: {
-          first_name: firstName,
-          last_name: lastName,
+          firstName: firstName,
+          lastName: lastName,
           email: personEmail,
           phone: phone,
-          lead_type: leadType,
-          lead_source: 'Follow Up Boss Webhook',
+          leadType: leadType,
+          leadSource: 'Follow Up Boss Webhook',
           status: 'New',
           userId: defaultUser?.id, // Assign to default admin if multi-tenant lookup fails
           activeWorkflowId: targetWorkflow ? targetWorkflow.id : undefined,
           currentWorkflowDay: targetWorkflow ? 0 : undefined,
-          next_follow_up_at: targetWorkflow ? new Date() : undefined,
+          nextFollowUpAt: targetWorkflow ? new Date() : undefined,
         },
       });
 

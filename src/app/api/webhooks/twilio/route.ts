@@ -95,7 +95,7 @@ export async function POST(req: Request) {
     const updatedLeadData = {
         status: newStatus,
         activeWorkflowId: null, // Pause the workflow
-        urgency_score: newScore
+        urgencyScore: newScore
     };
 
     await prisma.lead.update({

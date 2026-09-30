@@ -14,12 +14,14 @@
 
 ## Integration Points (what needs wiring)
 
-### 1. Database Schema
-The `prisma/schema.prisma` needs models from BOTH projects:
+### 1. Database Schema ✅ DONE (2026-09-29)
+The `prisma/schema.prisma` has been unified with models from BOTH projects — 29 models total:
 
-**From leadG:** Organization, User, AiAgent, Lead, Campaign, CampaignStep, CampaignLead, CampaignAssignment, CallLog, EmailTemplate, SmsTemplate, VoicemailTemplate, Integration, PhoneNumber, ScheduledEvent
+**From leadG (base):** Organization, User, AiAgent, Lead, Campaign, CampaignStep, CampaignLead, CampaignAssignment, CallLog, EmailTemplate, SmsTemplate, VoicemailTemplate, Integration, PhoneNumber, ScheduledEvent
 
 **From leadcaller (ADD):** Agent, Notification, LeadActivity, FollowUpWorkflow, FollowUpStep, Conversation, MessageLog, EmailLog, DirectMailTask, Appointment, AIConversationSummary, LeadScore, IntegrationSettings, KnowledgeBaseSnippet
+
+**Merged (field union):** User (added agents/settings/knowledge/notifications relations), Lead (added real-estate fields: propertyAddress, city, state, zip, leadType, urgencyScore, lat/lng, motivation, timeline, budget, preapprovalStatus, hasAgent, notes, aiSummary, nextFollowUpAt + agent/workflow assignment), CallLog (kept leadG's comprehensive version)
 
 ### 2. Twilio Webhooks (merge both sets)
 - leadG: `/api/twilio/gather`, `/api/twilio/incoming`, `/api/twilio/status`, `/api/twilio/transfer-complete`, `/api/twilio/voice`, `/api/twilio/voicemail`

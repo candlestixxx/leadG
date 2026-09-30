@@ -97,7 +97,7 @@ export async function POST(req: Request) {
           await prisma.appointment.create({
               data: {
                   leadId: lead.id,
-                  agentId: lead.assigned_agent_id || "unassigned",
+                  agentId: lead.assignedAgentId || "unassigned",
                   date: mockAppointmentDate,
                   notes: `AI Scheduled Meeting. Summary: ${summary.substring(0, 100)}`
               }
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
     // 7. Update Lead
     const updatedLeadData = {
         status: newStatus,
-        urgency_score: Math.min((lead.urgency_score || 0) + urgencyBump, 100),
+        urgencyScore: Math.min((lead.urgencyScore || 0) + urgencyBump, 100),
         // If they talked for more than 30 seconds, auto-pause automated text workflows
         activeWorkflowId: durationSeconds > 30 ? null : lead.activeWorkflowId
     };

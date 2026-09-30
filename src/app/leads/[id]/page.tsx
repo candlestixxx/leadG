@@ -67,7 +67,7 @@ export default function LeadProfilePage({ params }: { params: Promise<{ id: stri
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
         <header className="mb-6 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">{lead.first_name} {lead.last_name}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{lead.firstName} {lead.lastName}</h1>
           <Link href="/leads" className="text-blue-600 hover:underline">Back to Leads</Link>
         </header>
 
@@ -78,9 +78,9 @@ export default function LeadProfilePage({ params }: { params: Promise<{ id: stri
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div><span className="text-gray-500 block">Email</span> {lead.email || 'N/A'}</div>
                 <div><span className="text-gray-500 block">Phone</span> {lead.phone || 'N/A'}</div>
-                <div><span className="text-gray-500 block">Type</span> {lead.lead_type}</div>
+                <div><span className="text-gray-500 block">Type</span> {lead.leadType}</div>
                 <div><span className="text-gray-500 block">Status</span> {lead.status}</div>
-                <div><span className="text-gray-500 block">Score</span> {lead.urgency_score || 0}/100</div>
+                <div><span className="text-gray-500 block">Score</span> {lead.urgencyScore || 0}/100</div>
                 {lead.activeWorkflow && (
                   <div className="col-span-2 mt-2 p-3 bg-indigo-50 border border-indigo-100 rounded text-indigo-800">
                     <span className="font-semibold block mb-1">Active Workflow:</span>
@@ -95,11 +95,11 @@ export default function LeadProfilePage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
 
-            {lead.ai_summary && (
+            {lead.aiSummary && (
               <div className="bg-blue-50 shadow rounded-lg p-6 border border-blue-200">
                 <h2 className="text-xl font-semibold mb-4 text-blue-900">Latest AI Summary</h2>
                 <pre className="text-sm text-gray-800 whitespace-pre-wrap font-sans">
-                  {lead.ai_summary}
+                  {lead.aiSummary}
                 </pre>
               </div>
             )}

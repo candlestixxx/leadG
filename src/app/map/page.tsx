@@ -13,15 +13,15 @@ const MapComponent = dynamic(() => import('./MapComponent'), {
 
 type Lead = {
   id: string;
-  first_name: string;
-  last_name: string;
-  property_address: string | null;
+  firstName: string;
+  lastName: string;
+  propertyAddress: string | null;
   city: string | null;
   state: string | null;
   zip: string | null;
   latitude: number | null;
   longitude: number | null;
-  lead_type: string;
+  leadType: string;
   phone: string | null;
 };
 
@@ -168,14 +168,14 @@ export default function MapPage() {
   const generateCsv = () => {
     const headers = ["first_name", "last_name", "phone", "property_address", "city", "state", "zip", "lead_type"];
     const rows = filteredLeads.map(l => [
-      l.first_name,
-      l.last_name,
+      l.firstName,
+      l.lastName,
       l.phone || '',
-      `"${l.property_address || ''}"`,
+      `"${l.propertyAddress || ''}"`,
       l.city || '',
       l.state || '',
       l.zip || '',
-      l.lead_type
+      l.leadType
     ].join(","));
 
     const csv = [headers.join(","), ...rows].join("\n");

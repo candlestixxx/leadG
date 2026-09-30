@@ -22,7 +22,7 @@ export class SentimentAnalyzer {
             const openai = new OpenAI({ apiKey: openAiKey });
 
             const contextStr = `
-            Lead Profile: ${JSON.stringify({ first_name: lead.first_name, last_name: lead.last_name, status: lead.status, type: lead.lead_type })}
+            Lead Profile: ${JSON.stringify({ firstName: lead.firstName, lastName: lead.lastName, status: lead.status, type: lead.leadType })}
             Recent Activities: ${JSON.stringify(activities.map(a => a.description))}
             AI Conversation Summary: ${summary?.summary || 'None available'}
             `;
@@ -63,8 +63,8 @@ export class SentimentAnalyzer {
     }
 
     return {
-        subject: `Following up regarding your property search, ${lead.first_name}`,
-        body: `Hi ${lead.first_name},\n\nI just wanted to touch base regarding your real estate goals. Are you available for a quick chat tomorrow?\n\nBest,\nJules (AI Concierge)`
+        subject: `Following up regarding your property search, ${lead.firstName}`,
+        body: `Hi ${lead.firstName},\n\nI just wanted to touch base regarding your real estate goals. Are you available for a quick chat tomorrow?\n\nBest,\nJules (AI Concierge)`
     };
   }
 
@@ -82,7 +82,7 @@ export class SentimentAnalyzer {
             const openai = new OpenAI({ apiKey: openAiKey });
 
             const contextStr = `
-            Lead Profile: ${JSON.stringify({ first_name: lead.first_name, status: lead.status, type: lead.lead_type, timeline: lead.timeline, budget: lead.budget })}
+            Lead Profile: ${JSON.stringify({ firstName: lead.firstName, status: lead.status, type: lead.leadType, timeline: lead.timeline, budget: lead.budget })}
             Recent Activities: ${JSON.stringify(activities.map(a => a.description))}
             `;
 
@@ -102,7 +102,7 @@ export class SentimentAnalyzer {
                         schema: {
                             type: "object",
                             properties: {
-                                urgency_score: { type: "integer", description: "0 to 100" }
+                                urgencyScore: { type: "integer", description: "0 to 100" }
                             },
                             required: ["urgency_score"],
                             additionalProperties: false
@@ -114,7 +114,7 @@ export class SentimentAnalyzer {
 
             if (completion.choices[0].message.content) {
                 const result = JSON.parse(completion.choices[0].message.content);
-                return result.urgency_score;
+                return result.urgencyScore;
             }
         } catch (e) {
             console.error("[ScorePredictor] OpenAI API failed, falling back to heuristic score.", e);
@@ -122,7 +122,7 @@ export class SentimentAnalyzer {
     }
 
     // Fallback heuristic if OpenAI fails or key is missing
-    return lead.urgency_score ? Math.min(lead.urgency_score + 10, 100) : 50;
+    return lead.urgencyScore ? Math.min(lead.urgencyScore + 10, 100) : 50;
   }
 
   static async analyze(message: string, userId?: string): Promise<SentimentResult> {
