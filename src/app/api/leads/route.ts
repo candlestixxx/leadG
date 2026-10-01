@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from '@/lib/auth';
 import { GeocodingAdapter } from '@/lib/adapters/geocoding';
 import { broadcastEvent } from '@/lib/sse/emitter';
 
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     const leads = await prisma.lead.findMany({
       where: whereClause,
       orderBy: { createdAt: 'desc' },
-      include: { agent: true, activeWorkflow: true }
+      include: { assignedAgent: true, activeWorkflow: true }
     });
     return NextResponse.json(leads);
   } catch (error) {
@@ -99,6 +99,7 @@ export async function POST(request: Request) {
         leadType: body.leadType || 'Buyer',
         status: 'New',
         userId: user.id,
+        organizationId: user.organizationId,
         activeWorkflowId: targetWorkflow ? targetWorkflow.id : undefined,
         currentWorkflowDay: targetWorkflow ? 0 : undefined,
         nextFollowUpAt: targetWorkflow ? new Date() : undefined, // Schedule immediately

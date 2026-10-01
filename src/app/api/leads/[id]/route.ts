@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCrmProvider } from '@/lib/adapters';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from '@/lib/auth';
 
 export async function GET(
   request: Request,
@@ -21,7 +21,7 @@ export async function GET(
     const lead = await prisma.lead.findUnique({
       where: { id: leadId },
       include: {
-        agent: true,
+        assignedAgent: true,
         activeWorkflow: true,
         activities: { orderBy: { createdAt: 'desc' } },
         scores: { orderBy: { createdAt: 'desc' } }

@@ -55,6 +55,7 @@ export async function POST(req: Request) {
           leadSource: 'Follow Up Boss Webhook',
           status: 'New',
           userId: defaultUser?.id, // Assign to default admin if multi-tenant lookup fails
+          organizationId: defaultUser?.organizationId ?? '',
           activeWorkflowId: targetWorkflow ? targetWorkflow.id : undefined,
           currentWorkflowDay: targetWorkflow ? 0 : undefined,
           nextFollowUpAt: targetWorkflow ? new Date() : undefined,

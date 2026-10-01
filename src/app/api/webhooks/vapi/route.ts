@@ -42,8 +42,13 @@ export async function POST(req: Request) {
     await prisma.callLog.create({
       data: {
         leadId: lead.id,
+        organizationId: lead.organizationId,
+        direction: "INBOUND",
+        fromNumber: payload.phoneNumber || payload.from || "unknown",
+        toNumber: payload.to || "unknown",
+        status: summary ? "COMPLETED" : "NO_ANSWER",
         duration: durationSeconds,
-        outcome: summary ? "Completed" : "No Answer / Voicemail"
+        outcome: summary ? "INTERESTED" : "VOICEMAIL_LEFT"
       }
     });
 

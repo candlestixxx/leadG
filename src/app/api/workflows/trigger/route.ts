@@ -5,7 +5,7 @@ import { SentimentAnalyzer } from '@/lib/adapters/sentiment';
 import { getMlsProvider } from '@/lib/adapters/mls';
 import { SCRIPTS, compileScript, generateMockSummary } from '@/lib/scripts';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     const lead = await prisma.lead.findUnique({
       where: { id: leadId },
-      include: { agent: true }
+      include: { assignedAgent: true }
     });
     if (!lead || lead.userId !== user.id) return NextResponse.json({ error: 'Lead not found or access denied' }, { status: 404 });
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const scriptData: Record<string, any> = {
       firstName: lead.firstName,
       lastName: lead.lastName,
-      agent_name: lead.agent?.name || 'Local Agent',
+      agent_name: lead.assignedAgent?.name || 'Local Agent',
       area: lead.city || 'your area',
       propertyAddress: lead.propertyAddress,
       leadType: lead.leadType,

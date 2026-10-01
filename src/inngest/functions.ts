@@ -21,7 +21,7 @@ export const processWorkflowTick = inngest.createFunction(
             },
             include: {
                 activeWorkflow: { include: { steps: true } },
-                agent: true,
+                assignedAgent: true,
                 user: true
             },
             take: 50 // process in batches of 50 to prevent timeout blocks
@@ -31,7 +31,7 @@ export const processWorkflowTick = inngest.createFunction(
     let processedCount = 0;
 
     // 2. Process each lead in parallel steps
-    type OverdueLead = Lead & { activeWorkflow: (FollowUpWorkflow & { steps: FollowUpStep[] }) | null, agent: Agent | null, user: User | null };
+    type OverdueLead = Lead & { activeWorkflow: (FollowUpWorkflow & { steps: FollowUpStep[] }) | null, assignedAgent: Agent | null, user: User | null };
 
     const processPromises = overdueLeads.map((lead: OverdueLead) => {
         return step.run(`process-lead-${lead.id}`, async () => {
@@ -61,7 +61,7 @@ export const processWorkflowTick = inngest.createFunction(
             let stepExecuted = false;
 
             if (activeStep.channel === "sms" && activeStep.message) {
-              const compiled = compileScript(activeStep.message, { ...lead, agent_name: lead.agent?.name || 'an agent' } as any);
+              const compiled = compileScript(activeStep.message, { ...lead, agent_name: lead.assignedAgent?.name || 'an agent' } as any);
               await getSmsProvider().sendText(lead.id, compiled);
 
               await prisma.leadActivity.create({
@@ -70,7 +70,7 @@ export const processWorkflowTick = inngest.createFunction(
               stepExecuted = true;
             }
             else if (activeStep.channel === "email" && activeStep.message) {
-              const compiled = compileScript(activeStep.message, { ...lead, agent_name: lead.agent?.name || 'an agent' } as any);
+              const compiled = compileScript(activeStep.message, { ...lead, agent_name: lead.assignedAgent?.name || 'an agent' } as any);
               await getEmailProvider().sendEmail(lead.id, "Follow Up", compiled);
 
               await prisma.leadActivity.create({

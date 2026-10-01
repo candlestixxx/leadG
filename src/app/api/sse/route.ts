@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sseEmitter } from '@/lib/sse/emitter';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
