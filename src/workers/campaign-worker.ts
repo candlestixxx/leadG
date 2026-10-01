@@ -30,14 +30,33 @@ const callWorker = new Worker('calls', async (job: Job) => {
   console.log(`Processing call job: ${name}`, data)
 }, { connection, concurrency: 3 })
 
-// Email worker
+// Email worker — supports SendGrid API or SMTP fallback
 const emailWorker = new Worker('emails', async (job: Job) => {
   console.log(`Processing email job:`, job.data)
-  // Send email using SendGrid/SMTP
   const { to, subject, body } = job.data
 
+  // Try SendGrid API first
+  if (process.env.SENDGRID_API_KEY) {
+    try {
+      const sgMail = await import('@sendgrid/mail').then(m => m.default || m);
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      await sgMail.send({
+        to,
+        from: process.env.SENDGRID_FROM_EMAIL || 'noreply@voiceforge.ai',
+        subject: subject || 'Update from VoiceForge',
+        text: body,
+        html: `<div>${body}</div>`,
+      });
+      console.log('Email sent via SendGrid to:', to);
+      return;
+    } catch (error) {
+      console.error('SendGrid failed, falling back to SMTP:', error);
+    }
+  }
+
+  // SMTP fallback
   if (!process.env.SMTP_HOST) {
-     console.warn('SMTP configuration missing. Skipping email send.')
+     console.warn('No email configuration (SENDGRID_API_KEY or SMTP_HOST). Skipping email send.')
      return
   }
 

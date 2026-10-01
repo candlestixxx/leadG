@@ -19,8 +19,10 @@ export function LiveAudioMonitor({ callSid, agentId }: { callSid?: string, agent
       return
     }
 
-    // Connect to the WebSocket stub endpoint
-    const wsUrl = `ws://${window.location.host}/api/twilio/stream`
+    // Connect to the Live Audio WebSocket server
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const audioPort = process.env.NEXT_PUBLIC_LIVE_AUDIO_PORT || '8090';
+    const wsUrl = wsProtocol + '://' + window.location.hostname + ':' + audioPort + '/?role=monitor&callSid=' + (callSid || '') + '&agentId=' + (agentId || '');
     const ws = new WebSocket(wsUrl)
     wsRef.current = ws
 
