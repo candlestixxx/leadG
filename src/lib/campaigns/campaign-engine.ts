@@ -195,7 +195,7 @@ export class CampaignEngine {
       if (campaign.isAbTesting && Array.isArray(campaign.abTestVariants) && campaign.abTestVariants.length > 0) {
           if (!assignedVariant) {
              // 50/50 split assignment logic
-             assignedVariant = Math.random() > 0.5 ? 'A' : 'B'
+             assignedVariant = this.pickVariantByWeight(campaign.abTestVariants as any[])
           }
 
           const variantConfig = (campaign.abTestVariants as any[]).find(v => v.id === assignedVariant)
@@ -384,6 +384,17 @@ export class CampaignEngine {
 
   // ─── Helpers ──────────────────────────────────────────────
 
+  private pickVariantByWeight(variants: any[]): string {
+    if (!variants || variants.length === 0) return 'A'
+    const totalWeight = variants.reduce((sum: number, v: any) => sum + (v.weight || 50), 0)
+    let random = Math.random() * totalWeight
+    for (const variant of variants) {
+      random -= (variant.weight || 50)
+      if (random <= 0) return variant.id
+    }
+    return variants[variants.length - 1].id
+  }
+
   private isWithinCallWindow(campaign: any): boolean {
     const tz = campaign.timezone || 'America/New_York'
     const now = toZonedTime(new Date(), tz)
@@ -429,3 +440,4 @@ export class CampaignEngine {
 }
 
 export const campaignEngine = new CampaignEngine()
+
