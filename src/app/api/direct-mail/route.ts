@@ -36,8 +36,17 @@ export async function POST(request: Request) {
     const user = await prisma.user.findUnique({ where: { email: session.user.email }});
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
     const { leadId, campaignType } = body;
+
+    if (!leadId || !campaignType) {
+      return NextResponse.json({ error: 'leadId and campaignType are required' }, { status: 400 });
+    }
 
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead || lead.userId !== user.id) return NextResponse.json({ error: 'Lead not found or access denied' }, { status: 404 });
@@ -51,15 +60,22 @@ export async function POST(request: Request) {
       }
     });
 
-    // 2. Dispatch async Inngest event
-    await inngest.send({
-        name: 'direct-mail/dispatch',
-        data: {
-            leadId,
-            campaignType,
-            taskId: task.id
-        }
-    });
+    // 2. Dispatch async Inngest event (graceful if unconfigured)
+    try {
+      await inngest.send({
+          name: 'direct-mail/dispatch',
+          data: {
+              leadId,
+              campaignType,
+              taskId: task.id
+          }
+      });
+    } catch (inngestErr) {
+      const msg = inngestErr instanceof Error ? inngestErr.message : String(inngestErr);
+      if (!/event key|signing key|ECONNREFUSED|fetch failed|ENOTFOUND/i.test(msg)) {
+        throw inngestErr;
+      }
+    }
 
     await prisma.leadActivity.create({
       data: { leadId, type: 'Direct Mail', description: `Direct mail task queued for ${campaignType}` }
