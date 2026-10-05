@@ -3,15 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/lib/db/prisma"
 import bcrypt from "bcryptjs"
 
-/**
- * NextAuth configuration, shared by the route handler and API routes.
- *
- * Why: Next.js `route.ts` files may only export HTTP verbs and route config.
- * `authOptions` used to live in `src/app/api/auth/[...nextauth]/route.ts`
- * (or was expected there), which either failed to build or failed to typecheck.
- * Hoisting the config here lets the route handler and every API route import
- * the same object via `@/lib/auth`.
- */
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -49,6 +40,20 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt"
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as any).id = token.id
+      }
+      return session
+    }
   },
   pages: {
     signIn: '/login',
