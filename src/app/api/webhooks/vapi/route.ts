@@ -5,7 +5,12 @@ import { getCrmProvider, getCalendarProvider } from "@/lib/adapters";
 // This endpoint receives EndOfCall webhooks from Vapi.ai
 export async function POST(req: Request) {
   try {
-    const payload = await req.json();
+    let payload;
+    try {
+      payload = await req.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
 
     // Vapi wraps webhook events in a `message` object
     const message = payload.message;

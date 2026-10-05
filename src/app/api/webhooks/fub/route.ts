@@ -5,7 +5,12 @@ import { broadcastEvent } from "@/lib/sse/emitter";
 // This endpoint receives incoming webhooks from Follow Up Boss (FUB)
 export async function POST(req: Request) {
   try {
-    const payload = await req.json();
+    let payload;
+    try {
+      payload = await req.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
 
     // Example FUB Payload structure
     // { event: 'people.updated', uri: 'https://api.followupboss.com/v1/people/12345', data: { personId: 12345, ... } }

@@ -39,7 +39,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Parse Lead Data
-    const payload = await req.json()
+    let payload;
+    try {
+        payload = await req.json()
+    } catch {
+        return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
 
     // Minimal validation
     if (!payload.phone || !payload.firstName) {
