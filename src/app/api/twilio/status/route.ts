@@ -11,6 +11,10 @@ export async function POST(req: NextRequest) {
   const duration = formData.get('CallDuration') as string
   const recordingUrl = formData.get('RecordingUrl') as string
 
+  if (!callSid || !callStatus) {
+    return NextResponse.json({ error: 'CallSid and CallStatus are required' }, { status: 400 })
+  }
+
   await twilioService.handleStatusUpdate({
     callSid,
     callStatus,

@@ -160,7 +160,7 @@ export class TwilioService {
       updateData.recordingUrl = params.recordingUrl
     }
 
-    await prisma.callLog.update({
+    await prisma.callLog.updateMany({
       where: { twilioCallSid: params.callSid },
       data: updateData
     })

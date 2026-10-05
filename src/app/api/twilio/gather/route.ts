@@ -13,10 +13,18 @@ export async function POST(req: NextRequest) {
   const confidence = formData.get('Confidence') as string
 
   const url = new URL(req.url)
-  const agentId = url.searchParams.get('agentId')!
+  const agentId = url.searchParams.get('agentId')
   const leadId = url.searchParams.get('leadId')
   const campaignId = url.searchParams.get('campaignId')
   const retry = url.searchParams.get('retry') === 'true'
+
+  if (!agentId) {
+    return errorResponse('Missing agentId parameter.')
+  }
+
+  if (!callSid) {
+    return NextResponse.json({ error: 'CallSid is required' }, { status: 400 })
+  }
 
   // Get or create conversation
   let conversation = activeConversations.get(callSid)
