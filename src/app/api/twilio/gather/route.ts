@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
   const result = await conversation.processInput(speechResult)
 
   // Update call log
-  await prisma.callLog.update({
+  await prisma.callLog.updateMany({
     where: { twilioCallSid: callSid },
     data: {
       transcript: conversation.getTranscript()

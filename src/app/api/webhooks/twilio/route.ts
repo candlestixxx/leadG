@@ -98,7 +98,7 @@ export async function POST(req: Request) {
         urgencyScore: newScore
     };
 
-    await prisma.lead.update({
+    await prisma.lead.updateMany({
       where: { id: lead.id },
       data: updatedLeadData
     });

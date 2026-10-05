@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
   if (callSid && recordingUrl) {
     try {
-        await prisma.callLog.update({
+        await prisma.callLog.updateMany({
         where: { twilioCallSid: callSid },
         data: {
             voicemailLeft: true,

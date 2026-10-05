@@ -7,7 +7,12 @@ import { getCrmProvider } from "@/lib/adapters";
 // SendGrid posts data as multipart/form-data.
 export async function POST(req: Request) {
   try {
-    const formData = await req.formData();
+    let formData;
+    try {
+      formData = await req.formData();
+    } catch {
+      return NextResponse.json({ error: "Expected form data with 'from' and 'text' fields" }, { status: 400 });
+    }
 
     // Extract required fields
     const fromRaw = formData.get("from") as string || "";
@@ -95,7 +100,7 @@ export async function POST(req: Request) {
         urgencyScore: newScore
     };
 
-    await prisma.lead.update({
+    await prisma.lead.updateMany({
       where: { id: lead.id },
       data: updatedLeadData
     });

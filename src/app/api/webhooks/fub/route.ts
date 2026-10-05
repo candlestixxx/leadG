@@ -105,7 +105,7 @@ export async function POST(req: Request) {
         console.log(`[FUB Webhook] Halting active workflows for Lead ${lead.id} based on upstream CRM state.`);
     }
 
-    await prisma.lead.update({
+    await prisma.lead.updateMany({
         where: { id: lead.id },
         data: updateData
     });

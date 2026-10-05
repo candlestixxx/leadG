@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
            if (organizationId) {
               // Determine plan from line items (requires expanding line_items, or matching amount/id)
               // For prototype, we'll bump to PROFESSIONAL if payment succeeds
-              await prisma.organization.update({
+              await prisma.organization.updateMany({
                 where: { id: organizationId },
                 data: { plan: 'PROFESSIONAL' }
               })

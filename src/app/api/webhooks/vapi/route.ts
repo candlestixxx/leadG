@@ -123,7 +123,7 @@ export async function POST(req: Request) {
         activeWorkflowId: durationSeconds > 30 ? null : lead.activeWorkflowId
     };
 
-    await prisma.lead.update({
+    await prisma.lead.updateMany({
       where: { id: lead.id },
       data: updatedLeadData
     });
