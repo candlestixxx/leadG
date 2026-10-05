@@ -15,6 +15,14 @@ export async function POST() {
         message: 'Engine tick successfully queued for background processing.'
     });
   } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (/event key|signing key|ECONNREFUSED|fetch failed|ENOTFOUND/i.test(msg)) {
+      return NextResponse.json({
+        success: false,
+        queued: false,
+        message: 'Engine tick not queued — Inngest is not configured. Set INNGEST_EVENT_KEY to enable.'
+      }, { status: 202 });
+    }
     console.error(error);
     return NextResponse.json({ error: 'Failed to queue engine tick' }, { status: 500 });
   }
