@@ -103,6 +103,7 @@ export async function POST(request: Request) {
         longitude: lon,
         leadType: body.leadType || 'Buyer',
         status: 'New',
+        tags: Array.isArray(body.tags) ? body.tags : [],
         userId: user.id,
         organizationId: user.organizationId,
         activeWorkflowId: targetWorkflow ? targetWorkflow.id : undefined,
@@ -125,7 +126,11 @@ export async function POST(request: Request) {
     broadcastEvent('new_lead', lead);
 
     return NextResponse.json(lead, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Lead create error:', error);
+    if (error?.code === 'P2002') {
+      return NextResponse.json({ error: 'A lead with this phone already exists' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to create lead' }, { status: 500 });
   }
 }
