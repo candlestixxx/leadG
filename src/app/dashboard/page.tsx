@@ -25,8 +25,8 @@ export default function EnhancedDashboard() {
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null)
   const [showABSetup, setShowABSetup] = useState(false)
   const [abVariants, setAbVariants] = useState([
-    { id: 'A', weight: 50, aiAgentId: '' },
-    { id: 'B', weight: 50, aiAgentId: '' }
+    { id: 'A', weight: 50, aiAgentId: '', emailSubject: '', emailBody: '', smsBody: '' },
+    { id: 'B', weight: 50, aiAgentId: '', emailSubject: '', emailBody: '', smsBody: '' }
   ])
   const [loading, setLoading] = useState(true)
 
@@ -211,6 +211,44 @@ export default function EnhancedDashboard() {
                         max="100"
                       />
                       <span className="text-sm text-gray-500">%</span>
+                    </div>
+                  ))}
+                  {abVariants.map((variant, idx) => (
+                    <div key={variant.id + '-content'} className="border-t pt-3 space-y-2">
+                      <p className="text-sm font-medium text-gray-700">Variant {variant.id} Content Overrides</p>
+                      <input
+                        type="text"
+                        placeholder="Email subject (optional override)"
+                        value={variant.emailSubject || ''}
+                        onChange={(e) => {
+                          const nv = [...abVariants]
+                          nv[idx].emailSubject = e.target.value
+                          setAbVariants(nv)
+                        }}
+                        className="w-full px-3 py-2 border rounded text-sm"
+                      />
+                      <textarea
+                        placeholder="Email body (optional override — leave blank to use campaign default)"
+                        value={variant.emailBody || ''}
+                        onChange={(e) => {
+                          const nv = [...abVariants]
+                          nv[idx].emailBody = e.target.value
+                          setAbVariants(nv)
+                        }}
+                        className="w-full px-3 py-2 border rounded text-sm"
+                        rows={3}
+                      />
+                      <textarea
+                        placeholder="SMS body (optional override — leave blank to use campaign default)"
+                        value={variant.smsBody || ''}
+                        onChange={(e) => {
+                          const nv = [...abVariants]
+                          nv[idx].smsBody = e.target.value
+                          setAbVariants(nv)
+                        }}
+                        className="w-full px-3 py-2 border rounded text-sm"
+                        rows={2}
+                      />
                     </div>
                   ))}
                   <div className="flex gap-3 pt-4">
