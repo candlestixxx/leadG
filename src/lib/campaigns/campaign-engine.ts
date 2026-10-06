@@ -295,6 +295,19 @@ export class CampaignEngine {
            }
         }
 
+        // A/B variant email content override — variant can carry its own
+        // subject/body or a templateId so each variant tests different copy.
+        if (campaign.isAbTesting && campaignLead.abVariantId && Array.isArray(campaign.abTestVariants)) {
+          const abVariant = (campaign.abTestVariants as any[]).find((v: any) => v.id === campaignLead.abVariantId)
+          if (abVariant?.emailTemplateId) {
+            const vt = await prisma.emailTemplate.findUnique({ where: { id: abVariant.emailTemplateId } })
+            if (vt) { emailBody = vt.body; emailSubject = vt.subject; }
+          } else if (abVariant?.emailBody) {
+            emailBody = abVariant.emailBody
+            if (abVariant.emailSubject) emailSubject = abVariant.emailSubject
+          }
+        }
+
         // Hydrate variables
         emailBody = emailBody.replace(/{firstName}/g, campaignLead.lead.firstName)
                              .replace(/{company}/g, campaignLead.lead.company || '')
@@ -317,6 +330,18 @@ export class CampaignEngine {
            if (template) {
               smsBody = template.body
            }
+        }
+
+        // A/B variant SMS content override — variant can carry its own
+        // SMS copy or templateId so each variant tests different messaging.
+        if (campaign.isAbTesting && campaignLead.abVariantId && Array.isArray(campaign.abTestVariants)) {
+          const abVariant = (campaign.abTestVariants as any[]).find((v: any) => v.id === campaignLead.abVariantId)
+          if (abVariant?.smsTemplateId) {
+            const vt = await prisma.smsTemplate.findUnique({ where: { id: abVariant.smsTemplateId } })
+            if (vt) smsBody = vt.body
+          } else if (abVariant?.smsBody) {
+            smsBody = abVariant.smsBody
+          }
         }
 
         // Hydrate variables
