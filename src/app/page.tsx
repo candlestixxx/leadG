@@ -271,6 +271,23 @@ export default async function Dashboard() {
 
       {/* Main Content */}
       <main className="relative z-10 max-w-[1600px] mx-auto px-6 py-8">
+        {/* Project Goal */}
+        <div className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/60 p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 text-[var(--bg-primary)]" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-[var(--text-primary)]">LeadG — Voice &amp; Lead Engine</h2>
+              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
+                AI-powered voice agents for lead generation, qualification, and sales automation.
+                Create campaigns, manage AI agents, and track outbound calls — all from one command center.
+                Part of the <a href="https://excellegacyrealtygroup.site" className="text-[var(--accent)] underline">Excel Legacy Realty Group</a> platform.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="mb-8 animate-fade-up">
           <h1 className="text-2xl font-bold tracking-tight">Welcome back, James</h1>
           <p className="text-[var(--text-muted)] mt-1">
