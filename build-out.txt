@@ -1,0 +1,119 @@
+
+> voiceforge-ai@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.5
+  - Environments: .env.production.local
+
+   Creating an optimized production build ...
+(node:28552) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/46) ...
+A/B test analytics error: q [Error]: Dynamic server usage: Route /api/campaigns/ab-test couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at W (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:21106)
+    at Object.get (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:28459)
+    at p (C:\Users\hyper\workspace\realestatecrm\apps\leadg\.next\server\app\api\campaigns\ab-test\route.js:1:604)
+    at C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\@opentelemetry\api\build\src\context\NoopContextManager.js:14:19)
+    at ContextAPI.with (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\@opentelemetry\api\build\src\api\context.js:51:46)
+    at NoopTracer.startActiveSpan (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\@opentelemetry\api\build\src\trace\NoopTracer.js:54:31)
+    at ProxyTracer.startActiveSpan (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\@opentelemetry\api\build\src\trace\ProxyTracer.js:27:24)
+    at C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\next\dist\server\lib\trace\tracer.js:122:103 {
+  description: "Route /api/campaigns/ab-test couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (11/46) 
+Error generating Twilio token: n [Error]: Dynamic server usage: Route /api/twilio/token couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (C:\Users\hyper\workspace\realestatecrm\apps\leadg\.next\server\chunks\8948.js:1:37249)
+    at d (C:\Users\hyper\workspace\realestatecrm\apps\leadg\.next\server\chunks\2632.js:30:26595)
+    at s (C:\Users\hyper\workspace\realestatecrm\apps\leadg\.next\server\chunks\2632.js:30:19584)
+    at w (C:\Users\hyper\workspace\realestatecrm\apps\leadg\.next\server\app\api\twilio\token\route.js:1:1616)
+    at C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\next\dist\compiled\next-server\app-route.runtime.prod.js:6:36264
+    at C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\next\dist\server\lib\trace\tracer.js:140:36
+    at NoopContextManager.with (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\@opentelemetry\api\build\src\context\NoopContextManager.js:14:19)
+    at ContextAPI.with (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\@opentelemetry\api\build\src\api\context.js:51:46)
+    at NoopTracer.startActiveSpan (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\@opentelemetry\api\build\src\trace\NoopTracer.js:54:31)
+    at ProxyTracer.startActiveSpan (C:\Users\hyper\workspace\realestatecrm\apps\leadg\node_modules\@opentelemetry\api\build\src\trace\ProxyTracer.js:27:24) {
+  description: "Route /api/twilio/token couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (22/46) 
+   Generating static pages (34/46) 
+ ✓ Generating static pages (46/46)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                               Size     First Load JS
+┌ ƒ /                                     2.94 kB         128 kB
+├ ○ /_not-found                           871 B          88.5 kB
+├ ƒ /agents                               184 B          94.5 kB
+├ ƒ /agents/[id]                          586 B           132 kB
+├ ƒ /analytics                            566 B           125 kB
+├ ƒ /api/auth/[...nextauth]               0 B                0 B
+├ ƒ /api/campaigns/ab-test                0 B                0 B
+├ ƒ /api/direct-mail                      0 B                0 B
+├ ƒ /api/engine/tick                      0 B                0 B
+├ ƒ /api/inngest                          0 B                0 B
+├ ƒ /api/leads                            0 B                0 B
+├ ƒ /api/leads/[id]                       0 B                0 B
+├ ƒ /api/leads/[id]/sync                  0 B                0 B
+├ ƒ /api/notifications                    0 B                0 B
+├ ƒ /api/settings                         0 B                0 B
+├ ƒ /api/settings/knowledge               0 B                0 B
+├ ƒ /api/settings/knowledge/[id]          0 B                0 B
+├ ƒ /api/settings/vapi-assistants         0 B                0 B
+├ ƒ /api/sse                              0 B                0 B
+├ ƒ /api/twilio/gather                    0 B                0 B
+├ ƒ /api/twilio/incoming                  0 B                0 B
+├ ƒ /api/twilio/status                    0 B                0 B
+├ ƒ /api/twilio/token                     0 B                0 B
+├ ƒ /api/twilio/transfer-complete         0 B                0 B
+├ ƒ /api/twilio/voice                     0 B                0 B
+├ ƒ /api/twilio/voicemail                 0 B                0 B
+├ ƒ /api/webhooks/crm                     0 B                0 B
+├ ƒ /api/webhooks/fub                     0 B                0 B
+├ ƒ /api/webhooks/sendgrid                0 B                0 B
+├ ƒ /api/webhooks/stripe                  0 B                0 B
+├ ƒ /api/webhooks/twilio                  0 B                0 B
+├ ƒ /api/webhooks/vapi                    0 B                0 B
+├ ƒ /api/webhooks/vapi-tools              0 B                0 B
+├ ƒ /api/workflows                        0 B                0 B
+├ ƒ /api/workflows/trigger                0 B                0 B
+├ ƒ /campaigns                            586 B           132 kB
+├ ƒ /campaigns/[id]                       586 B           132 kB
+├ ○ /dashboard                            2.67 kB          97 kB
+├ ○ /direct-mail                          1.28 kB        95.7 kB
+├ ƒ /leads                                184 B          94.5 kB
+├ ƒ /leads/[id]                           1.78 kB        96.1 kB
+├ ○ /leads/import                         1.52 kB        95.9 kB
+├ ○ /leads/new                            1.53 kB        95.9 kB
+├ ○ /login                                12.1 kB        99.7 kB
+├ ○ /map                                  3.04 kB        97.4 kB
+├ ƒ /settings                             184 B          94.5 kB
+├ ƒ /settings/billing                     184 B          94.5 kB
+├ ○ /settings/integrations                1.91 kB        89.5 kB
+├ ○ /settings/knowledge                   1.5 kB         89.1 kB
+├ ○ /settings/scripts                     1 kB           88.6 kB
+├ ○ /workflows                            1.05 kB        95.4 kB
+└ ○ /workflows/builder                    31.3 kB         126 kB
++ First Load JS shared by all             87.6 kB
+  ├ chunks/23-3cc0212bd55fbf47.js         31.5 kB
+  ├ chunks/fd9d1056-caf000818b4d13ca.js   53.6 kB
+  └ other shared chunks (total)           2.42 kB
+
+Route (pages)                             Size     First Load JS
+─ ƒ /api/mcp                              0 B              80 kB
++ First Load JS shared by all             80 kB
+  ├ chunks/framework-f66176bb897dc684.js  45.2 kB
+  ├ chunks/main-4e4d9fb9938a326e.js       32.5 kB
+  └ other shared chunks (total)           2.4 kB
+
+ƒ Middleware                              47.7 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

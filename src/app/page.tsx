@@ -237,6 +237,10 @@ export default async function Dashboard() {
               </div>
               <span className="font-bold text-lg tracking-tight">VoiceForge</span>
             </div>
+            <a href="https://excellegacyrealtygroup.site" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors" title="Back to Excel Legacy Realty Group main dashboard">
+              <ArrowUpRight className="w-3.5 h-3.5 rotate-180" />
+              <span>Main Dashboard</span>
+            </a>
             <div className="flex items-center gap-1">
               {['Dashboard', 'Campaigns', 'Agents', 'Leads', 'Calls', 'Settings'].map((item, i) => (
                 <a key={i} className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
