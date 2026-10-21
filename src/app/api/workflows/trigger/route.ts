@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getVoiceProvider, getSmsProvider, getEmailProvider } from '@/lib/adapters';
 import { SentimentAnalyzer } from '@/lib/adapters/sentiment';
 import { getMlsProvider } from '@/lib/adapters/mls';
-import { SCRIPTS, compileScript, generateMockSummary } from '@/lib/scripts';
+import { SCRIPTS, compileScript, generateCallSummary } from '@/lib/scripts';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth';
 
@@ -75,11 +75,26 @@ export async function POST(request: Request) {
     }
 
     if (action === 'warm_transfer') {
-      await voice.warmTransfer(leadId, agentPhone || '555-0000');
+      // A warm transfer MUST have a real destination number — never dial a
+      // placeholder. Resolve from request body, then the assigned agent.
+      const transferTarget = agentPhone || (lead.assignedAgent as any)?.phone;
+      if (!transferTarget) {
+        return NextResponse.json(
+          { error: 'warm_transfer requires agentPhone (or a phone number on the assigned agent profile)' },
+          { status: 400 }
+        );
+      }
+      const transferred = await voice.warmTransfer(leadId, transferTarget);
+      if (!transferred) {
+        return NextResponse.json(
+          { error: 'Warm transfer failed — check Vapi credentials in Settings' },
+          { status: 502 }
+        );
+      }
 
       const bridgeScript = compileScript(SCRIPTS.warmTransferBridge, scriptData);
       const whisperScript = compileScript(SCRIPTS.agentWhisper, scriptData);
-      const summaryText = generateMockSummary(scriptData, 'Lead Transferred to Agent');
+      const summaryText = generateCallSummary(scriptData, 'Lead Transferred to Agent');
 
       // Update lead status
       await prisma.lead.update({

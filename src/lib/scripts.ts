@@ -21,16 +21,20 @@ export function compileScript(scriptTemplate: string, data: Record<string, strin
   return compiled;
 }
 
-export function generateMockSummary(leadData: Record<string, string | null | undefined>, outcome: string): string {
+/**
+ * Build a call summary from REAL lead data + outcome. Missing fields are
+ * reported as 'Not provided' — never invent motivation/timeline/budget.
+ */
+export function generateCallSummary(leadData: Record<string, string | null | undefined>, outcome: string): string {
   return `
 Lead Name: ${leadData.firstName} ${leadData.lastName}
 Lead Type: ${leadData.leadType}
-Phone: ${leadData.phone || 'N/A'}
-Email: ${leadData.email || 'N/A'}
+Phone: ${leadData.phone || 'Not provided'}
+Email: ${leadData.email || 'Not provided'}
 Conversation Outcome: ${outcome}
-Motivation: ${leadData.motivation || 'Just looking'}
-Timeline: ${leadData.timeline || '3-6 months'}
-Budget: ${leadData.budget || 'Not specified'}
+Motivation: ${leadData.motivation || 'Not provided'}
+Timeline: ${leadData.timeline || 'Not provided'}
+Budget: ${leadData.budget || 'Not provided'}
 Urgency Score: ${outcome.includes('Transferred') ? 90 : 50}
 Recommended Next Action: ${outcome.includes('Transferred') ? 'Agent follow up' : 'Continue 10-Day Blitz'}
   `.trim();

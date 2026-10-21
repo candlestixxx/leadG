@@ -97,21 +97,26 @@ export async function POST(req: Request) {
     // 6. Check for appointments
     if (summaryLower.includes('tomorrow') || summaryLower.includes('today') || summaryLower.includes('monday') || summaryLower.includes('tuesday') || summaryLower.includes('wednesday') || summaryLower.includes('thursday') || summaryLower.includes('friday') || summaryLower.includes('saturday') || summaryLower.includes('sunday')) {
        if (summaryLower.includes('appointment') || summaryLower.includes('meet') || summaryLower.includes('showing')) {
-          // Trigger Appointment booking adapter
-          // For MVP, we extract a mock future date since parsing absolute time from natural language requires an LLM call.
-          const mockAppointmentDate = new Date();
-          mockAppointmentDate.setDate(mockAppointmentDate.getDate() + 1); // Tomorrow
+          // Extract the real date from the transcript with the LLM.
+          // If it cannot be inferred, skip scheduling entirely — never book
+          // a fabricated "tomorrow" appointment.
+          const { extractAppointmentDate } = await import('@/lib/ai/llm');
+          const parsedDate = await extractAppointmentDate(transcript || summary);
 
-          await getCalendarProvider().createAppointment(lead.id, mockAppointmentDate);
+          if (parsedDate) {
+            await getCalendarProvider().createAppointment(lead.id, parsedDate);
 
-          await prisma.appointment.create({
-              data: {
-                  leadId: lead.id,
-                  agentId: lead.assignedAgentId || "unassigned",
-                  date: mockAppointmentDate,
-                  notes: `AI Scheduled Meeting. Summary: ${summary.substring(0, 100)}`
-              }
-          });
+            await prisma.appointment.create({
+                data: {
+                    leadId: lead.id,
+                    agentId: lead.assignedAgentId || "unassigned",
+                    date: parsedDate,
+                    notes: `AI Scheduled Meeting. Summary: ${summary.substring(0, 100)}`
+                }
+            });
+          } else {
+            console.warn('[Vapi] Appointment mentioned but no date could be extracted — skipping scheduling.');
+          }
        }
     }
 

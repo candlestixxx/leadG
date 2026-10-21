@@ -30,7 +30,7 @@ export default function LeadProfilePage({ params }: { params: Promise<{ id: stri
     if (!lead) return;
     try {
       let endpoint = '/api/workflows/trigger';
-      let payload: any = { leadId: lead.id, action, agentPhone: '555-1234' };
+      let payload: any = { leadId: lead.id, action }; // agentPhone resolved server-side from the assigned agent profile
 
       if (action === 'direct_mail') {
         endpoint = '/api/direct-mail';

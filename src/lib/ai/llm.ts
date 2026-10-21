@@ -24,3 +24,46 @@ export function createLLMClient(apiKey: string): OpenAI {
 export function resolveLLMKey(userKey?: string): string | undefined {
   return process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || userKey;
 }
+
+/**
+ * Parse an appointment date out of natural-language call summary text.
+ *
+ * Replaces a hardcoded "tomorrow" placeholder with a real LLM extraction.
+ * Returns null when the LLM is unavailable or no date can be inferred — the
+ * caller must NOT invent a date in that case.
+ */
+export async function extractAppointmentDate(text: string): Promise<Date | null> {
+  const key = resolveLLMKey();
+  if (!key || !text) return null;
+
+  try {
+    const client = createLLMClient(key);
+    const completion = await client.chat.completions.create({
+      model: LLM_MODEL,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Extract the appointment/meeting date and time from the text. ' +
+            'Respond with ONLY a JSON object: {"isoDate": "<ISO 8601>" | null}. ' +
+            'Today is ' + new Date().toISOString() + '. If no date is inferable, use null.',
+        },
+        { role: 'user', content: text },
+      ],
+      response_format: { type: 'json_object' },
+      max_tokens: 2048,
+    });
+
+    const content = completion.choices[0]?.message?.content;
+    if (!content) return null;
+    const parsed = JSON.parse(content);
+    const iso = parsed.isoDate ?? parsed.iso_date ?? parsed.date;
+    if (!iso) return null;
+
+    const date = new Date(iso);
+    return isNaN(date.getTime()) ? null : date;
+  } catch (e) {
+    console.warn('[LLM] extractAppointmentDate failed:', e);
+    return null;
+  }
+}

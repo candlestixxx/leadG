@@ -43,6 +43,10 @@ export class MockVoiceProvider implements VoiceProvider {
   }
 }
 
+// NOTE: the Mock* providers below are TEST-ONLY fixtures. Production adapter
+// methods return false with an explicit error log when credentials are
+// missing — they never fake success for an action that did not happen.
+
 export class GoogleCalendarProvider implements CalendarProvider {
   async createAppointment(leadId: string, date: Date) {
     try {
@@ -55,12 +59,11 @@ export class GoogleCalendarProvider implements CalendarProvider {
       const token = settings?.apiKey;
 
       if (!token) {
-        console.warn('Google Calendar token missing, falling back to mock provider');
-        return new MockCalendarProvider().createAppointment(leadId, date);
+        console.error('Google Calendar token missing — appointment NOT created. Connect Google Calendar in Settings.');
+        return false;
       }
 
-      // Mock integration for Google Calendar (would use googleapis package in production)
-      // e.g. calendar.events.insert({ ... })
+      // Real Google Calendar API call
       const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
         method: 'POST',
         headers: {
@@ -112,8 +115,8 @@ export class LobDirectMailProvider implements DirectMailProvider {
       const lobKey = settings?.apiKey;
 
       if (!lobKey) {
-        console.warn('Lob API key missing, falling back to mock provider');
-        return new MockDirectMailProvider().createMailTask(leadId, campaignType);
+        console.error('Lob API key missing — postcard NOT sent. Connect Lob in Settings.');
+        return false;
       }
 
       const authHeader = 'Basic ' + Buffer.from(`${lobKey}:`).toString('base64');
@@ -133,7 +136,7 @@ export class LobDirectMailProvider implements DirectMailProvider {
             address_state: lead.state,
             address_zip: lead.zip
           },
-          // Mock HTML template for Lob
+          // Postcard artwork (Lob HTML templates)
           front: "<html><body><h1>Exclusive Home Value Report for {{name}}</h1></body></html>",
           back: "<html><body><h1>Contact Jules Real Estate today!</h1></body></html>",
           merge_variables: {
@@ -168,15 +171,15 @@ export class VapiVoiceProvider implements VoiceProvider {
       });
       const vapiKey = settings.find(s => s.provider === 'vapi')?.apiKey;
       const vapiAssistantId = settings.find(s => s.provider === 'vapi_assistant_id')?.apiKey;
+      const vapiPhoneNumberId = settings.find(s => s.provider === 'vapi_phone_number_id')?.apiKey;
 
-      if (!vapiKey) {
-        console.warn('Vapi credentials missing, falling back to mock provider');
-        return new MockVoiceProvider().callLead(leadId);
+      if (!vapiKey || !vapiAssistantId) {
+        console.error('Vapi credentials missing — call NOT placed. Connect Vapi in Settings.');
+        return false;
       }
-
-      if (!vapiAssistantId) {
-        console.warn('Vapi Assistant ID missing, falling back to mock provider');
-        return new MockVoiceProvider().callLead(leadId);
+      if (!vapiPhoneNumberId) {
+        console.error('Vapi phone number ID missing — call NOT placed. Set vapi_phone_number_id in Settings.');
+        return false;
       }
 
       // Fetch knowledge base snippets to inject into the AI
@@ -197,7 +200,7 @@ export class VapiVoiceProvider implements VoiceProvider {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          phoneNumberId: 'your-vapi-phone-number-id', // Assuming static or from settings in a real app
+          phoneNumberId: vapiPhoneNumberId,
           customer: {
             number: lead.phone,
             name: `${lead.firstName} ${lead.lastName}`,
@@ -206,11 +209,11 @@ export class VapiVoiceProvider implements VoiceProvider {
             systemPrompt: `You are Jules, an AI real estate assistant. ${knowledgeContext}`,
             variableValues: {
               leadId: lead.id,
-              userId: lead.userId || "mock_user"
+              userId: lead.userId || 'unassigned'
             },
             clientMessages: ["tool-calls"],
             serverMessages: ["tool-calls", "end-of-call-report"],
-            serverUrl: "https://your-production-url.com/api/webhooks/vapi-tools",
+            serverUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://excellegacyrealtygroup.site'}/api/webhooks/vapi-tools`,
             tools: [
               {
                 type: "function",
@@ -246,10 +249,46 @@ export class VapiVoiceProvider implements VoiceProvider {
   }
 
   async warmTransfer(leadId: string, agentPhone: string) {
-    console.log(`Vapi Mock: Warm transferring lead ${leadId} to agent ${agentPhone}`);
-    // Note: Warm transfers in Vapi typically require handling mid-call functions
-    // via a Server URL. For MVP outbound, we mock this specific step.
-    return true;
+    // Real warm transfers in Vapi are executed mid-call via a server-side
+    // tool call (the transfer tool registered on the assistant). Attempt the
+    // Vapi tool-call API; never claim success for a transfer that didn't run.
+    try {
+      const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+      const settings = await prisma.integrationSettings.findMany({
+        where: { provider: { in: ['vapi', 'vapi_assistant_id'] }, userId: lead?.userId || undefined }
+      });
+      const vapiKey = settings.find(s => s.provider === 'vapi')?.apiKey;
+      const vapiAssistantId = settings.find(s => s.provider === 'vapi_assistant_id')?.apiKey;
+
+      if (!vapiKey || !vapiAssistantId) {
+        console.error('Vapi credentials missing — warm transfer NOT executed.');
+        return false;
+      }
+
+      // Ask the active call (bound to this lead) to run the transfer tool.
+      const response = await fetch(`https://api.vapi.ai/assistant/${vapiAssistantId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${vapiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // FirstMessage / tooling override carrying the transfer target so
+          // the in-call transfer tool dials the right agent.
+          model: { toolIds: [] },
+          variableValues: { transferTo: agentPhone },
+        }),
+      });
+
+      if (!response.ok) {
+        console.error(`Vapi warm transfer failed: HTTP ${response.status}`);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.error('Vapi warm transfer error:', e);
+      return false;
+    }
   }
 }
 
@@ -274,8 +313,8 @@ export class SendGridEmailProvider implements EmailProvider {
       const fromEmail = settings.find(s => s.provider === 'sendgrid_from_email')?.apiKey;
 
       if (!apiKey || !fromEmail) {
-        console.warn('SendGrid credentials incomplete, falling back to mock provider');
-        return new MockEmailProvider().sendEmail(leadId, subject, body);
+        console.error('SendGrid credentials incomplete — email NOT sent. Connect SendGrid in Settings.');
+        return false;
       }
 
       sgMail.setApiKey(apiKey);
@@ -348,8 +387,8 @@ export class TwilioSmsProvider implements SmsProvider {
       const preferredChannel = settings.find(s => s.provider === 'preferred_messaging_channel')?.apiKey || channel;
 
       if (!sid || !token || !from) {
-        console.warn('Twilio credentials incomplete, falling back to mock provider');
-        return new MockSmsProvider().sendText(leadId, message, preferredChannel as 'sms' | 'whatsapp');
+        console.error('Twilio credentials incomplete — message NOT sent. Connect Twilio in Settings.');
+        return false;
       }
 
       const client = twilio(sid, token);
