@@ -4,14 +4,15 @@ import OpenAI from 'openai';
  * Central LLM client factory for LeadG.
  *
  * DeepSeek is OpenAI-compatible, so when DEEPSEEK_API_KEY is set we point the
- * OpenAI SDK at DeepSeek and use `deepseek-chat` (DeepSeek does NOT support
- * OpenAI's `response_format: json_schema` — use `json_object` + a prompt
- * instruction instead). Otherwise we fall back to the previous OpenAI config.
+ * OpenAI SDK at DeepSeek and use `deepseek-v4-flash` (DeepSeek does NOT
+ * support OpenAI's `response_format: json_schema` — use `json_object` + a
+ * prompt instruction instead). Otherwise we fall back to the previous OpenAI
+ * config. Set DEEPSEEK_MODEL=deepseek-v4-pro for the highest-quality tier.
  */
 
 export const USING_DEEPSEEK = !!process.env.DEEPSEEK_API_KEY;
 export const LLM_MODEL = USING_DEEPSEEK
-  ? process.env.DEEPSEEK_MODEL || 'deepseek-chat'
+  ? process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash'
   : 'gpt-4o-mini';
 export const LLM_BASE_URL = USING_DEEPSEEK ? 'https://api.deepseek.com/v1' : undefined;
 
