@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import OpenAI from 'openai'
+import { createLLMClient } from '@/lib/ai/llm'
 import { ConversationEngine } from '@/lib/ai/conversation-engine'
 
 // Store active conversations (in production, use Redis)
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+    const openai = createLLMClient(process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || 'dummy')
     conversation = new ConversationEngine(openai, {
       agentId: agent.id,
       leadId: leadId || undefined,

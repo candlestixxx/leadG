@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import { LLM_MODEL } from '@/lib/ai/llm'
 import { prisma } from '@/lib/db/prisma'
 
 // ─── Types ──────────────────────────────────────────────────
@@ -196,7 +197,7 @@ ${p.prohibitedTopics?.length ? `\n## PROHIBITED TOPICS\nDo not discuss: ${p.proh
 
     // Generate response
     const completion = await this.openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: LLM_MODEL,
       messages: this.messages.map(m => ({
         role: m.role,
         content: m.content
@@ -381,7 +382,7 @@ Don't reveal that you are reading from a CRM, sound completely human and natural
       .join('\n')
 
     const completion = await this.openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: LLM_MODEL,
       messages: [
         {
           role: 'system',

@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import { LLM_MODEL } from '@/lib/ai/llm'
 import { prisma } from '@/lib/db/prisma'
 
 export class ReflectionEngine {
@@ -25,7 +26,7 @@ export class ReflectionEngine {
 
     try {
       const completion = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: LLM_MODEL,
         messages: [
           {
             role: 'system',

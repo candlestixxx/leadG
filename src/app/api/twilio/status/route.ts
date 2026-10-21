@@ -69,8 +69,8 @@ export async function POST(req: NextRequest) {
 
       try {
         const { ReflectionEngine } = await import('@/lib/ai/reflection-engine')
-        const OpenAI = (await import('openai')).default
-        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'dummy' })
+        const { createLLMClient } = await import('@/lib/ai/llm')
+        const openai = createLLMClient(process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || 'dummy')
         const reflection = new ReflectionEngine(openai)
         // Run asynchronously without blocking the webhook response
         reflection.analyzeCallTranscript(callLog.id).catch(console.error)

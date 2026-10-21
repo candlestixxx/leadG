@@ -1,5 +1,5 @@
-import { OpenAI } from "openai";
 import { prisma } from "@/lib/prisma";
+import { createLLMClient, LLM_MODEL } from "@/lib/ai/llm";
 
 export type SentimentResult = {
   sentiment: "POSITIVE" | "NEGATIVE" | "NEUTRAL";
@@ -9,7 +9,7 @@ export type SentimentResult = {
 
 export class SentimentAnalyzer {
   static async generateEmail(lead: any, activities: any[], summary: any, userId?: string): Promise<{ subject: string, body: string }> {
-    let openAiKey = process.env.OPENAI_API_KEY;
+    let openAiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY;
     if (userId) {
         const settings = await prisma.integrationSettings.findFirst({
             where: { provider: 'openai_api_key', userId }
@@ -19,7 +19,7 @@ export class SentimentAnalyzer {
 
     if (openAiKey) {
         try {
-            const openai = new OpenAI({ apiKey: openAiKey });
+            const openai = createLLMClient(openAiKey);
 
             const contextStr = `
             Lead Profile: ${JSON.stringify({ firstName: lead.firstName, lastName: lead.lastName, status: lead.status, type: lead.leadType })}
@@ -28,37 +28,22 @@ export class SentimentAnalyzer {
             `;
 
             const completion = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
+                model: LLM_MODEL,
                 messages: [
                     {
                         role: "system",
-                        content: "You are an elite real estate assistant named Jules. Write a highly personalized, natural, and concise email to follow up with a lead. Do not sound like a robot. Pivot towards getting a meeting or phone call. Return JSON."
+                        content: "You are an elite real estate assistant named Jules. Write a highly personalized, natural, and concise email to follow up with a lead. Do not sound like a robot. Pivot towards getting a meeting or phone call. Respond with ONLY a JSON object with string keys \"subject\" and \"body\"."
                     },
                     { role: "user", content: `Generate an email for this lead based on their context: ${contextStr}` },
                 ],
-                response_format: {
-                    type: "json_schema",
-                    json_schema: {
-                        name: "email_result",
-                        schema: {
-                            type: "object",
-                            properties: {
-                                subject: { type: "string" },
-                                body: { type: "string" }
-                            },
-                            required: ["subject", "body"],
-                            additionalProperties: false
-                        },
-                        strict: true
-                    }
-                }
+                response_format: { type: "json_object" },
             });
 
             if (completion.choices[0].message.content) {
                 return JSON.parse(completion.choices[0].message.content);
             }
         } catch (e) {
-            console.error("[EmailGenerator] OpenAI API failed, falling back to mock heuristics.", e);
+            console.error("[EmailGenerator] LLM API failed, falling back to mock heuristics.", e);
         }
     }
 
@@ -69,7 +54,7 @@ export class SentimentAnalyzer {
   }
 
   static async predictLeadScore(lead: any, activities: any[], userId?: string): Promise<number> {
-    let openAiKey = process.env.OPENAI_API_KEY;
+    let openAiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY;
     if (userId) {
         const settings = await prisma.integrationSettings.findFirst({
             where: { provider: 'openai_api_key', userId }
@@ -79,7 +64,7 @@ export class SentimentAnalyzer {
 
     if (openAiKey) {
         try {
-            const openai = new OpenAI({ apiKey: openAiKey });
+            const openai = createLLMClient(openAiKey);
 
             const contextStr = `
             Lead Profile: ${JSON.stringify({ firstName: lead.firstName, status: lead.status, type: lead.leadType, timeline: lead.timeline, budget: lead.budget })}
@@ -87,48 +72,34 @@ export class SentimentAnalyzer {
             `;
 
             const completion = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
+                model: LLM_MODEL,
                 messages: [
                     {
                         role: "system",
-                        content: "You are an expert real estate data scientist with a predictive ML background. Analyze the lead's profile, financial indicators (budget, preapproval), timeline, and recent behavioral activities. Calculate an exact integer 'urgency_score' from 0 to 100 representing how close this lead is to transacting (100 being immediate). Evaluate cross-signals such as unresponsive emails vs. proactive calls. Respond with ONLY JSON."
+                        content: "You are an expert real estate data scientist with a predictive ML background. Analyze the lead's profile, financial indicators (budget, preapproval), timeline, and recent behavioral activities. Calculate an exact integer 'urgency_score' from 0 to 100 representing how close this lead is to transacting (100 being immediate). Evaluate cross-signals such as unresponsive emails vs. proactive calls. Respond with ONLY a JSON object with an integer key \"urgency_score\"."
                     },
                     { role: "user", content: `Predict score for: ${contextStr}` },
                 ],
-                response_format: {
-                    type: "json_schema",
-                    json_schema: {
-                        name: "score_result",
-                        schema: {
-                            type: "object",
-                            properties: {
-                                urgencyScore: { type: "integer", description: "0 to 100" }
-                            },
-                            required: ["urgency_score"],
-                            additionalProperties: false
-                        },
-                        strict: true
-                    }
-                }
+                response_format: { type: "json_object" },
             });
 
             if (completion.choices[0].message.content) {
                 const result = JSON.parse(completion.choices[0].message.content);
-                return result.urgencyScore;
+                return result.urgency_score ?? result.urgencyScore ?? 50;
             }
         } catch (e) {
-            console.error("[ScorePredictor] OpenAI API failed, falling back to heuristic score.", e);
+            console.error("[ScorePredictor] LLM API failed, falling back to heuristic score.", e);
         }
     }
 
-    // Fallback heuristic if OpenAI fails or key is missing
+    // Fallback heuristic if LLM fails or key is missing
     return lead.urgencyScore ? Math.min(lead.urgencyScore + 10, 100) : 50;
   }
 
   static async analyze(message: string, userId?: string): Promise<SentimentResult> {
 
-    // 1. Try to initialize OpenAI with the tenant's API key
-    let openAiKey = process.env.OPENAI_API_KEY;
+    // 1. Try to initialize the LLM with the tenant's API key
+    let openAiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY;
 
     if (userId) {
         const settings = await prisma.integrationSettings.findFirst({
@@ -140,40 +111,24 @@ export class SentimentAnalyzer {
     // 2. Execute true LLM structured output if key exists
     if (openAiKey) {
         try {
-            const openai = new OpenAI({ apiKey: openAiKey });
+            const openai = createLLMClient(openAiKey);
             const completion = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
+                model: LLM_MODEL,
                 messages: [
                     {
                         role: "system",
-                        content: "You are an expert real estate lead parser. Analyze the user's message and determine the sentiment and intent. 'HOT' means they want to meet, talk, or buy/sell. 'DNC' means do not contact. 'UNSUBSCRIBE' means stop texting."
+                        content: "You are an expert real estate lead parser. Analyze the user's message and determine the sentiment and intent. 'HOT' means they want to meet, talk, or buy/sell. 'DNC' means do not contact. 'UNSUBSCRIBE' means stop texting. Respond with ONLY a JSON object with keys: sentiment (one of POSITIVE, NEGATIVE, NEUTRAL), intent (one of HOT, NOT_INTERESTED, DNC, UNSUBSCRIBE, INFO_REQUEST, GENERAL), and confidence (float 0-1)."
                     },
                     { role: "user", content: message },
                 ],
-                response_format: {
-                    type: "json_schema",
-                    json_schema: {
-                        name: "sentiment_result",
-                        schema: {
-                            type: "object",
-                            properties: {
-                                sentiment: { type: "string", enum: ["POSITIVE", "NEGATIVE", "NEUTRAL"] },
-                                intent: { type: "string", enum: ["HOT", "NOT_INTERESTED", "DNC", "UNSUBSCRIBE", "INFO_REQUEST", "GENERAL"] },
-                                confidence: { type: "number", description: "Float between 0 and 1" }
-                            },
-                            required: ["sentiment", "intent", "confidence"],
-                            additionalProperties: false
-                        },
-                        strict: true
-                    }
-                }
+                response_format: { type: "json_object" },
             });
 
             if (completion.choices[0].message.content) {
                 return JSON.parse(completion.choices[0].message.content) as SentimentResult;
             }
         } catch (e) {
-            console.error("[SentimentAnalyzer] OpenAI API failed, falling back to mock heuristics.", e);
+            console.error("[SentimentAnalyzer] LLM API failed, falling back to mock heuristics.", e);
         }
     }
 
