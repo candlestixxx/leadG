@@ -309,8 +309,8 @@ export class SendGridEmailProvider implements EmailProvider {
         }
       });
 
-      const apiKey = settings.find(s => s.provider === 'sendgrid_api_key')?.apiKey;
-      const fromEmail = settings.find(s => s.provider === 'sendgrid_from_email')?.apiKey;
+      const apiKey = settings.find(s => s.provider === 'sendgrid_api_key')?.apiKey || process.env.SENDGRID_API_KEY;
+      const fromEmail = settings.find(s => s.provider === 'sendgrid_from_email')?.apiKey || process.env.SENDGRID_FROM_EMAIL;
 
       if (!apiKey || !fromEmail) {
         console.error('SendGrid credentials incomplete — email NOT sent. Connect SendGrid in Settings.');
@@ -381,9 +381,9 @@ export class TwilioSmsProvider implements SmsProvider {
         }
       });
 
-      const sid = settings.find(s => s.provider === 'twilio_sid')?.apiKey;
-      const token = settings.find(s => s.provider === 'twilio_token')?.apiKey;
-      const from = settings.find(s => s.provider === 'twilio_from_number')?.apiKey;
+      const sid = settings.find(s => s.provider === 'twilio_sid')?.apiKey || process.env.TWILIO_SID;
+      const token = settings.find(s => s.provider === 'twilio_token')?.apiKey || process.env.TWILIO_TOKEN;
+      const from = settings.find(s => s.provider === 'twilio_from_number')?.apiKey || process.env.TWILIO_FROM_NUMBER;
       const preferredChannel = settings.find(s => s.provider === 'preferred_messaging_channel')?.apiKey || channel;
 
       if (!sid || !token || !from) {
