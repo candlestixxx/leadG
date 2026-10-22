@@ -1,5 +1,9 @@
 generator client {
   provider = "prisma-client-js"
+  // Package engines for local dev AND the Linux production target — without
+  // this, Windows builds only ship query_engine-windows.dll and the deployed
+  // client fails on Hetzner (debian-openssl-3.0.x engine missing).
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
 datasource db {
