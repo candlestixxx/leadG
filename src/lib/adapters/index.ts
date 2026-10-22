@@ -169,9 +169,9 @@ export class VapiVoiceProvider implements VoiceProvider {
       const settings = await prisma.integrationSettings.findMany({
         where: { provider: { in: ['vapi', 'vapi_assistant_id'] }, userId: lead.userId || undefined }
       });
-      const vapiKey = settings.find(s => s.provider === 'vapi')?.apiKey;
-      const vapiAssistantId = settings.find(s => s.provider === 'vapi_assistant_id')?.apiKey;
-      const vapiPhoneNumberId = settings.find(s => s.provider === 'vapi_phone_number_id')?.apiKey;
+      const vapiKey = settings.find(s => s.provider === 'vapi')?.apiKey || process.env.VAPI_API_KEY;
+      const vapiAssistantId = settings.find(s => s.provider === 'vapi_assistant_id')?.apiKey || process.env.VAPI_ASSISTANT_ID;
+      const vapiPhoneNumberId = settings.find(s => s.provider === 'vapi_phone_number_id')?.apiKey || process.env.VAPI_PHONE_NUMBER_ID;
 
       if (!vapiKey || !vapiAssistantId) {
         console.error('Vapi credentials missing — call NOT placed. Connect Vapi in Settings.');
@@ -257,8 +257,8 @@ export class VapiVoiceProvider implements VoiceProvider {
       const settings = await prisma.integrationSettings.findMany({
         where: { provider: { in: ['vapi', 'vapi_assistant_id'] }, userId: lead?.userId || undefined }
       });
-      const vapiKey = settings.find(s => s.provider === 'vapi')?.apiKey;
-      const vapiAssistantId = settings.find(s => s.provider === 'vapi_assistant_id')?.apiKey;
+      const vapiKey = settings.find(s => s.provider === 'vapi')?.apiKey || process.env.VAPI_API_KEY;
+      const vapiAssistantId = settings.find(s => s.provider === 'vapi_assistant_id')?.apiKey || process.env.VAPI_ASSISTANT_ID;
 
       if (!vapiKey || !vapiAssistantId) {
         console.error('Vapi credentials missing — warm transfer NOT executed.');
