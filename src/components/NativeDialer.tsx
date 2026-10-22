@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { apiUrl } from '@/lib/api-base';
 import { Device, Call } from '@twilio/voice-sdk';
+// Vapi Web SDK (client-side key): in-browser voice sessions with the AI
+// assistant — no phone line involved. Lazy-loaded so the Twilio dialer still
+// works when the package is unavailable.
 
 export default function NativeDialer() {
     const [token, setToken] = useState<string | null>(null);
@@ -13,6 +16,41 @@ export default function NativeDialer() {
     const [error, setError] = useState<string | null>(null);
     const [aiCalling, setAiCalling] = useState(false);
     const [aiNote, setAiNote] = useState<string | null>(null);
+    const [webCallActive, setWebCallActive] = useState(false);
+    const vapiRef = useRef<any>(null);
+
+    /**
+     * In-browser web call: talk to the AI assistant (Riley) directly through
+     * the Vapi Web SDK using the PUBLIC key — no phone line required. This is
+     * the "Client-side SDK access" capability of the Vapi public key.
+     */
+    const handleWebCall = async () => {
+        setError(null);
+        setAiNote(null);
+        try {
+            const cfgRes = await fetch(apiUrl('/api/vapi/config'));
+            const cfg = await cfgRes.json();
+            if (!cfg.configured) throw new Error('Vapi web calling is not configured.');
+
+            const { default: Vapi } = await import('@vapi-ai/web');
+            if (!vapiRef.current) vapiRef.current = new Vapi(cfg.publicKey);
+            vapiRef.current.start(cfg.assistantId);
+            setWebCallActive(true);
+            setAiNote('Browser call with Riley started — speak into your microphone.');
+        } catch (err: any) {
+            setError(err.message || 'Failed to start web call');
+        }
+    };
+
+    const handleWebCallEnd = () => {
+        try {
+            vapiRef.current?.stop();
+        } catch {
+            /* already stopped */
+        }
+        setWebCallActive(false);
+        setAiNote(null);
+    };
 
     /**
      * AI outbound call: the Vapi assistant (Riley) dials the number through
@@ -213,6 +251,18 @@ export default function NativeDialer() {
                            </button>
                         )}
                     </div>
+                    <button
+                        onClick={webCallActive ? handleWebCallEnd : handleWebCall}
+                        title="Talk to Riley in your browser (Vapi Web SDK — no phone line needed)"
+                        className={
+                            'w-full text-white p-2 rounded text-sm font-medium transition-colors ' +
+                            (webCallActive
+                                ? 'bg-red-500 hover:bg-red-600'
+                                : 'bg-sky-600 hover:bg-sky-700')
+                        }
+                    >
+                        {webCallActive ? 'End Browser Call' : 'Talk to Riley (Browser)'}
+                    </button>
                     <button
                         onClick={handleAiCall}
                         disabled={!phoneNumber || aiCalling}

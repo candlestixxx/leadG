@@ -24,6 +24,7 @@
     "@prisma/client": "5.17.0",
     "@sendgrid/mail": "^8.1.6",
     "@twilio/voice-sdk": "^2.18.5",
+    "@vapi-ai/web": "^3.0.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "bufferutil": "^4.1.0",
