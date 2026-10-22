@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { apiUrl } from '@/lib/api-base';
 import Link from 'next/link'
 import ABTestDashboard from '@/components/ab-testing/ABTestDashboard'
 
@@ -37,8 +38,8 @@ export default function EnhancedDashboard() {
   async function loadData() {
     try {
       const [campaignsRes, agentsRes] = await Promise.all([
-        fetch('/api/campaigns'),
-        fetch('/api/agents')
+        fetch(apiUrl('/api/campaigns')),
+        fetch(apiUrl('/api/agents'))
       ])
       if (campaignsRes.ok) setCampaigns(await campaignsRes.json())
       if (agentsRes.ok) setAgents(await agentsRes.json())
@@ -52,7 +53,7 @@ export default function EnhancedDashboard() {
   async function setupABTest() {
     if (!selectedCampaign) return
     try {
-      const res = await fetch('/api/campaigns/' + selectedCampaign, {
+      const res = await fetch(apiUrl('/api/campaigns/') + selectedCampaign, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

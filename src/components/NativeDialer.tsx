@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { apiUrl } from '@/lib/api-base';
 import { Device, Call } from '@twilio/voice-sdk';
 
 export default function NativeDialer() {
@@ -10,12 +11,40 @@ export default function NativeDialer() {
     const [callStatus, setCallStatus] = useState<string>('Offline');
     const [phoneNumber, setPhoneNumber] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
+    const [aiCalling, setAiCalling] = useState(false);
+    const [aiNote, setAiNote] = useState<string | null>(null);
+
+    /**
+     * AI outbound call: the Vapi assistant (Riley) dials the number through
+     * the configured Vapi line. Works without Twilio WebRTC — the private key
+     * stays server-side (POST /api/vapi/call).
+     */
+    const handleAiCall = async () => {
+        if (!phoneNumber) return;
+        setAiCalling(true);
+        setAiNote(null);
+        setError(null);
+        try {
+            const res = await fetch(apiUrl('/api/vapi/call'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'AI call failed');
+            setAiNote(data.message || 'AI call started.');
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setAiCalling(false);
+        }
+    };
 
     // Initialize Twilio Device on mount if token available
     useEffect(() => {
         const fetchToken = async () => {
             try {
-                const res = await fetch('/api/twilio/token');
+                const res = await fetch(apiUrl('/api/twilio/token'));
                 if (!res.ok) {
                     const data = await res.json();
                     throw new Error(data.error || 'Failed to fetch Twilio token');
@@ -184,6 +213,19 @@ export default function NativeDialer() {
                            </button>
                         )}
                     </div>
+                    <button
+                        onClick={handleAiCall}
+                        disabled={!phoneNumber || aiCalling}
+                        title="Riley (AI assistant) dials this number through the Vapi line"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white p-2 rounded text-sm font-medium transition-colors"
+                    >
+                        {aiCalling ? 'Starting AI call…' : 'AI Call (Riley)'}
+                    </button>
+                    {aiNote && (
+                        <div className="text-xs text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-100">
+                            {aiNote}
+                        </div>
+                    )}
                 </>
             ) : callStatus === 'Incoming call...' ? (
                  <div className="flex gap-2">

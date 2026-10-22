@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { apiUrl } from '@/lib/api-base';
 
 type KnowledgeSnippet = {
   id: string;
@@ -21,7 +22,7 @@ export default function KnowledgeBasePage() {
 
   const fetchSnippets = async () => {
     try {
-      const res = await fetch('/api/settings/knowledge');
+      const res = await fetch(apiUrl('/api/settings/knowledge'));
       if (res.ok) {
         setSnippets(await res.json());
       }
@@ -40,7 +41,7 @@ export default function KnowledgeBasePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch('/api/settings/knowledge', {
+      const res = await fetch(apiUrl('/api/settings/knowledge'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question, answer, category }),

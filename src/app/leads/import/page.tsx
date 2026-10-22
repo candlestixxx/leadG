@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { apiUrl } from '@/lib/api-base';
 import Link from 'next/link';
 
 export default function ImportLeadsPage() {
@@ -39,7 +40,7 @@ export default function ImportLeadsPage() {
           };
 
           try {
-            const res = await fetch('/api/leads', {
+            const res = await fetch(apiUrl('/api/leads'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload)

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { apiUrl } from '@/lib/api-base';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 
@@ -36,7 +37,7 @@ export default function MapPage() {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const res = await fetch('/api/leads');
+        const res = await fetch(apiUrl('/api/leads'));
         if (res.ok) {
           const data = await res.json();
           // Only keep leads that have coordinates

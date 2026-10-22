@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { apiUrl } from '@/lib/api-base';
 
 interface VariantResult {
   variantId: string
@@ -38,7 +39,7 @@ export default function ABTestDashboard({ campaignId }: { campaignId: string }) 
   async function fetchResults() {
     try {
       setLoading(true)
-      const res = await fetch('/api/campaigns/ab-test?campaignId=' + campaignId)
+      const res = await fetch(apiUrl('/api/campaigns/ab-test?campaignId=') + campaignId)
       if (!res.ok) throw new Error('Failed to fetch A/B test results')
       const data = await res.json()
       setResults(data)
